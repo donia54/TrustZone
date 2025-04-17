@@ -1,0 +1,6 @@
+@TrustZoneAPI_HostAddress = http://localhost:5287
+
+GET {{TrustZoneAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

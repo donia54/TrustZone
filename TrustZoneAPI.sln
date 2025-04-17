@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35825.156 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrustZoneAPI", "TrustZoneAPI\TrustZoneAPI.csproj", "{0EAE8C79-2070-4434-AE9F-7C430A5E2F82}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0EAE8C79-2070-4434-AE9F-7C430A5E2F82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0EAE8C79-2070-4434-AE9F-7C430A5E2F82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0EAE8C79-2070-4434-AE9F-7C430A5E2F82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0EAE8C79-2070-4434-AE9F-7C430A5E2F82}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BCF0F0B8-6DE6-42B4-929E-9588CD134F4F}
+	EndGlobalSection
+EndGlobal
