@@ -38,9 +38,11 @@ public class ConversationService : IConversationService
     public async Task<ResponseResult<IEnumerable<ConversationDTO>>> GetConversationsByUserIdAsync(string userId, int page = 1, int pageSize = 20)
     {
         var user = await _userService.GetByIdAsync(userId);
+        if (user == null)
+            return ResponseResult<IEnumerable<ConversationDTO>>.NotFound("User not found.");
         var conversations = await _conversationRepository.GetConversationsByUserIdAsync(userId, page, pageSize);
         if (!conversations.Any())
-            return ResponseResult<IEnumerable<ConversationDTO>>.NotFound("No conversations found for this user yet.");
+            return ResponseResult<IEnumerable<ConversationDTO>>.NotFound("No conversations found here yet.");
 
         var conversationDtos = conversations.Select(_ConvertToDTO);
         return ResponseResult<IEnumerable<ConversationDTO>>.Success(conversationDtos);

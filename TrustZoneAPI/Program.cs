@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -14,9 +14,21 @@ using TrustZoneAPI.Services.Categories;
 using TrustZoneAPI.Services.Places;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
+using TrustZoneAPI.MiddleWares;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+// إضافة HttpClient إلى DI Container
+builder.Services.AddHttpClient();
+
+// إضافة خدمات إلى الحاوية
+builder.Services.AddControllers();
+builder.Services.AddScoped<CurrentUserIdActionFilter>();  // إضافة الفلتر
+builder.Services.AddControllers(options =>
+{
+    options.Filters.AddService<CurrentUserIdActionFilter>();  // إضافة الفلتر للمشروع بأكمله
+});
 // Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -55,7 +67,8 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddSignalR();
 
 
-
+// For CurrenUserId
+builder.Services.AddHttpContextAccessor();
 
 
 
@@ -80,10 +93,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllersWithViews();
-builder.Services.AddRazorPages();
 
-builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

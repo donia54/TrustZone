@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
 using System.IdentityModel.Tokens.Jwt;
@@ -23,15 +24,24 @@ namespace TrustZoneAPI.Services.Users
         private readonly IAuthService _AuthService;
         private readonly SignInManager<User> _SignInManager;
         private readonly IUserRepository _UserRepository;
+        HttpContextAccessor _HttpContextAccessor;
 
         public UserService(UserManager<User> userManager,ITransactionService transactionService,
-            IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository)
+            IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository
+            , HttpContextAccessor httpContextAccessor)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
             _AuthService = authService;
             _SignInManager = signInManager;
             _UserRepository = userRepository;
+            _HttpContextAccessor = httpContextAccessor;
+
+        }
+        public bool IsCurrentUser(string userId)
+        {
+            string CurrentUserId = _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
+            return CurrentUserId == userId;
         }
 
         public async Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model)
