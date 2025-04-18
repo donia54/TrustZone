@@ -13,7 +13,7 @@ public interface IMessageService
     Task<ResponseResult<MessageDTO>> GetByIdAsync(int id);
     Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesByConversationAsync(int conversationId, int page = 1);
     Task<ResponseResult> CreateAsync(CreateMessageDTO dto);
-    Task<ResponseResult> UpdateAsync(int id, string CurrentUserId, UpdateMessageDTO dto);
+    Task<ResponseResult> UpdateAsync(int id, UpdateMessageDTO dto);
     Task<ResponseResult> DeleteAsync(int id, string CurrentUserId);
     Task<ResponseResult> MarkAsReadAsync(int messageId); // I think this should be internal only.
 }
