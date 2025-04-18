@@ -61,7 +61,10 @@ namespace TrustZoneAPI.Repositories
                 .ToListAsync();
         }
 
-
+        public async Task<bool> IsUserExists(string userId)
+        {
+            return await _userManager.Users.AnyAsync(u => u.Id == userId);
+        }
 
     }
 }

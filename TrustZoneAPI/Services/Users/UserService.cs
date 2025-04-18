@@ -35,7 +35,6 @@ namespace TrustZoneAPI.Services.Users
         public UserService(UserManager<User> userManager,ITransactionService transactionService,
             IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository
             , HttpContextAccessor httpContextAccessor)
-        public UserService(UserManager<User> userManager,ITransactionService transactionService,IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
