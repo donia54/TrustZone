@@ -6,6 +6,7 @@ using TrustZoneAPI.DTOs;
 using TrustZoneAPI.DTOs.User;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
+using TrustZoneAPI.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Users
 {
@@ -14,20 +15,28 @@ namespace TrustZoneAPI.Services.Users
         Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model);
 
         Task<ResponseResult<AuthDTO>> LoginAsync(LoginDTO login);
+
+
+        Task<ResponseResult<IEnumerable<UserDTO>>> GetAllUsersAsync();
+        Task<ResponseResult<UserDTO>> GetUserByIdAsync(string id);
+        Task<ResponseResult<UserDTO>> GetUserByEmailAsync(string email);
+        Task<ResponseResult> DeleteUserAsync(string id);
     }
     public class UserService : IUserService
     {
+        private readonly IUserRepository _userRepository;
         private readonly UserManager<User> _UserManager;
         private readonly ITransactionService _TransactionService;
         private readonly IAuthService _AuthService;
         private readonly SignInManager<User> _SignInManager;
 
-        public UserService(UserManager<User> userManager,ITransactionService transactionService,IAuthService authService, SignInManager<User> signInManager)
+        public UserService(UserManager<User> userManager,ITransactionService transactionService,IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
             _AuthService = authService;
             _SignInManager = signInManager;
+            _userRepository = userRepository;
         }
 
         public async Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model)
@@ -95,6 +104,53 @@ namespace TrustZoneAPI.Services.Users
            
         }
 
+
+
+
+        public async Task<ResponseResult<IEnumerable<UserDTO>>> GetAllUsersAsync()
+        {
+            try
+            {
+                var users = await _userRepository.GetAllAsync();
+                var userDtos = users.Select(u => _MapToDto(u)).ToList();
+                return ResponseResult<IEnumerable<UserDTO>>.Success(userDtos);
+            }
+            catch (Exception ex)
+            {
+                return ResponseResult<IEnumerable<UserDTO>>.FromException(ex);
+            }
+        }
+
+        public async Task<ResponseResult<UserDTO>> GetUserByIdAsync(string id)
+        {
+            var user = await _userRepository.GetByIdAsync(id);
+            if (user == null)
+                return ResponseResult<UserDTO>.NotFound("User not found.");
+
+            return ResponseResult<UserDTO>.Success(_MapToDto(user));
+        }
+
+        public async Task<ResponseResult<UserDTO>> GetUserByEmailAsync(string email)
+        {
+            var user = await _userRepository.GetByEmailAsync(email);
+            if (user == null)
+                return ResponseResult<UserDTO>.NotFound("User not found.");
+
+            return ResponseResult<UserDTO>.Success(_MapToDto(user));
+        }
+
+        public async Task<ResponseResult> DeleteUserAsync(string id)
+        {
+            var result = await _userRepository.DeleteAsync(id);
+            if (!result)
+                return ResponseResult.Error("Unable to delete user", 400);
+
+            return ResponseResult.Success();
+        }
+
+
+
+
         private User _InitializeUserRegisterationAsync(RegistrUserIdentity model)
         {
             return new User
@@ -108,7 +164,21 @@ namespace TrustZoneAPI.Services.Users
             };
         }
 
-      
+        private static UserDTO _MapToDto(User user)
+        {
+            return new UserDTO
+            {
+                Id = user.Id,
+                Email = user.Email!,
+                Age = user.Age,
+                ProfilePicture = user.ProfilePicture,
+                CoverPicture = user.CoverPicture,
+                RegistrationDate = user.RegistrationDate,
+                IsActive = user.IsActive
+            };
+        }
+
+
 
     }
 }

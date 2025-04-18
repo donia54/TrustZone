@@ -4,6 +4,7 @@ namespace TrustZoneAPI.Repositories.Interfaces
 {
     public interface IDisabilityTypeRepository :IRepository<DisabilityType,int>
     {
-
+        
+      
     }
 }
