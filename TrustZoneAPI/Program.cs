@@ -17,6 +17,8 @@ using Microsoft.Extensions.Options;
 using TrustZoneAPI.MiddleWares;
 using TrustZoneAPI.Services.Azure;
 using TrustZoneAPI.Services.Disabilities;
+using TrustZoneAPI.Services.Conversations;
+using TrustZoneAPI.Services.Messages;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +67,13 @@ builder.Services.AddScoped<IUserDisabilityRepository, UserDisabilityRepository>(
 builder.Services.AddScoped<IUserDisabilityService, UserDisabilityService>();
 
 
+builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<IConversationService, ConversationService>();
+
+builder.Services.AddScoped<ITMessageRepository, MessageRepository>();
+builder.Services.AddScoped<IMessageService, MessageService>();
+
+
 
 builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -100,6 +109,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddHttpContextAccessor();
 
 
 builder.Services.AddEndpointsApiExplorer();

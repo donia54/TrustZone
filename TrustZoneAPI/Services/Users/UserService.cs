@@ -30,11 +30,11 @@ namespace TrustZoneAPI.Services.Users
         private readonly IAuthService _AuthService;
         private readonly SignInManager<User> _SignInManager;
         private readonly IUserRepository _UserRepository;
-        HttpContextAccessor _HttpContextAccessor;
+        IHttpContextAccessor _HttpContextAccessor;
 
         public UserService(UserManager<User> userManager,ITransactionService transactionService,
             IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository
-            , HttpContextAccessor httpContextAccessor)
+            , IHttpContextAccessor httpContextAccessor)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
