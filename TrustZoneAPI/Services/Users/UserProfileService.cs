@@ -6,6 +6,7 @@ using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Azure;
+using TrustZoneAPI.Services.Disabilities;
 
 namespace TrustZoneAPI.Services.Users
 {
@@ -35,14 +36,14 @@ namespace TrustZoneAPI.Services.Users
         private readonly UserManager<User> _userManager;
         private readonly IBlobService _blobService;
         private readonly IUserRepository _userRepository;
-        private readonly IUserDisabilityRepository _userdisabilityRepository;
+        private readonly IUserDisabilityService _userdisability;
 
-        public UserProfileService(UserManager<User> userManager, IBlobService blobService,IUserRepository userRepository,IDisabilityTypeRepository userdisabilityRepository)
+        public UserProfileService(UserManager<User> userManager, IBlobService blobService,IUserRepository userRepository, IUserDisabilityService userdisability)
         {
             _userManager = userManager;
             _blobService = blobService;
             _userRepository = userRepository;
-            _userdisabilityRepository = _userdisabilityRepository;
+            _userdisability = _userdisability;
         }
 
 
@@ -168,18 +169,20 @@ namespace TrustZoneAPI.Services.Users
 
         private async Task<List<DisabilityTypeDTO>> _GetUserDisabilityTypesAsync(string userId)
         {
-            var types = await _userdisabilityRepository.GetUserDisabilitiesByUserIdAsync(userId);
-            return types.Select(t => new DisabilityTypeDTO
+            var types = await _userdisability.GetUserDisabilitiesByUserIdAsync(userId);
+            var disabilityTypeDTOs = types.Data.Select(t => new DisabilityTypeDTO
             {
                 Id = t.Id,
                 Name = t.Name
             }).ToList();
+
+            return disabilityTypeDTOs;
         }
 
         private async Task _UpdateUserDisabilityTypesAsync(string userId, List<DisabilityTypeDTO> disabilityTypes)
         {
             var disabilityTypeIds = disabilityTypes.Select(d => d.Id).ToList();
-            await _userdisabilityRepository.SetUserDisabilityTypesAsync(userId, disabilityTypeIds);
+            await _userdisability.SetUserDisabilityTypesAsync(userId, disabilityTypeIds);
         }
 
 

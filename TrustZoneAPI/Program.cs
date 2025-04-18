@@ -14,6 +14,8 @@ using TrustZoneAPI.Services.Categories;
 using TrustZoneAPI.Services.Places;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
+using TrustZoneAPI.Services.Azure;
+using TrustZoneAPI.Services.Disabilities;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,9 +47,14 @@ builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 builder.Services.AddScoped<IBranchService, BranchService>();
 builder.Services.AddScoped<IBranchOpeningHourRepository, BranchOpeningHourRepository>();
 builder.Services.AddScoped<IBranchOpeningHourService, BranchOpeningHourService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+builder.Services.AddScoped<IUserDisabilityRepository, UserDisabilityRepository>();
+builder.Services.AddScoped<IUserDisabilityService, UserDisabilityService>();
 
 
 
+builder.Services.AddScoped<IBlobService, BlobService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
