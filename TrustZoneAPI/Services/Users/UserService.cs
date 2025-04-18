@@ -12,8 +12,8 @@ namespace TrustZoneAPI.Services.Users
     public interface IUserService
     {
         Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model);
-
         Task<ResponseResult<AuthDTO>> LoginAsync(LoginDTO login);
+
     }
     public class UserService : IUserService
     {

@@ -10,4 +10,5 @@ namespace TrustZoneAPI.DTOs.Users
         public string Password { get; set; } = null!;
         public bool RememberMe { get; set; }
     }
+
 }
