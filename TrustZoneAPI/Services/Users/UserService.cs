@@ -6,6 +6,7 @@ using TrustZoneAPI.DTOs;
 using TrustZoneAPI.DTOs.User;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
+using TrustZoneAPI.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Users
 {
@@ -13,7 +14,7 @@ namespace TrustZoneAPI.Services.Users
     {
         Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model);
         Task<ResponseResult<AuthDTO>> LoginAsync(LoginDTO login);
-
+        Task<User?> GetByIdAsync(string id);
     }
     public class UserService : IUserService
     {
@@ -21,13 +22,16 @@ namespace TrustZoneAPI.Services.Users
         private readonly ITransactionService _TransactionService;
         private readonly IAuthService _AuthService;
         private readonly SignInManager<User> _SignInManager;
+        private readonly IUserRepository _UserRepository;
 
-        public UserService(UserManager<User> userManager,ITransactionService transactionService,IAuthService authService, SignInManager<User> signInManager)
+        public UserService(UserManager<User> userManager,ITransactionService transactionService,
+            IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
             _AuthService = authService;
             _SignInManager = signInManager;
+            _UserRepository = userRepository;
         }
 
         public async Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model)
@@ -108,8 +112,10 @@ namespace TrustZoneAPI.Services.Users
             };
         }
 
-      
-
+        public Task<User?> GetByIdAsync(string id)
+        {
+            return _UserRepository.GetByIdAsync(id);
+        }
     }
 }
 
