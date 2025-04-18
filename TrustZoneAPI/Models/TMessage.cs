@@ -11,7 +11,7 @@ public partial class TMessage
 
     public string SenderId { get; set; } = null!;
 
-    public string MessageText { get; set; } = null!;
+    public string Content { get; set; } = null!;
 
     public DateTime SentAt { get; set; }
 

@@ -1,7 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
-using System.IdentityModel.Tokens.Jwt;
 using TrustZoneAPI.DTOs;
 using TrustZoneAPI.DTOs.User;
 using TrustZoneAPI.DTOs.Users;
@@ -13,8 +10,11 @@ namespace TrustZoneAPI.Services.Users
     public interface IUserService
     {
         Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model);
-
         Task<ResponseResult<AuthDTO>> LoginAsync(LoginDTO login);
+        Task<User?> GetByIdAsync(string id);
+        bool IsCurrentUser(string userId);
+        Task<bool> IsUserExists(string userId);
+        string GetCurrentUserId();
 
 
         Task<ResponseResult<IEnumerable<UserDTO>>> GetAllUsersAsync();
@@ -29,14 +29,31 @@ namespace TrustZoneAPI.Services.Users
         private readonly ITransactionService _TransactionService;
         private readonly IAuthService _AuthService;
         private readonly SignInManager<User> _SignInManager;
+        private readonly IUserRepository _UserRepository;
+        HttpContextAccessor _HttpContextAccessor;
 
+        public UserService(UserManager<User> userManager,ITransactionService transactionService,
+            IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository
+            , HttpContextAccessor httpContextAccessor)
         public UserService(UserManager<User> userManager,ITransactionService transactionService,IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
             _AuthService = authService;
             _SignInManager = signInManager;
+            _UserRepository = userRepository;
+            _HttpContextAccessor = httpContextAccessor;
+
             _userRepository = userRepository;
+        }
+        public bool IsCurrentUser(string userId)
+        {
+            string CurrentUserId = _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
+            return CurrentUserId == userId;
+        }
+        public string GetCurrentUserId()
+        {
+            return _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
         }
 
         public async Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model)
@@ -164,6 +181,15 @@ namespace TrustZoneAPI.Services.Users
             };
         }
 
+        public Task<User?> GetByIdAsync(string id)
+        {
+            return _UserRepository.GetByIdAsync(id);
+        }
+
+        public async Task<bool> IsUserExists(string userId)
+        {
+            return await _UserRepository.IsUserExists(userId);
+        }
         private static UserDTO _MapToDto(User user)
         {
             return new UserDTO
