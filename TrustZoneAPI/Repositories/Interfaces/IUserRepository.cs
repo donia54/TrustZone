@@ -6,5 +6,6 @@ namespace TrustZoneAPI.Repositories.Interfaces
     {
         Task<User?> GetByEmailAsync(string email);
         Task<IEnumerable<User>> GetUsersByDisabilityAsync(int disabilityTypeId);
+        Task<bool> IsUserExists(string userId);
     }
 }

@@ -43,6 +43,11 @@ namespace TrustZoneAPI.Repositories
             throw new NotImplementedException();
         }
 
+        public async Task<bool> IsUserExists(string userId)
+        {
+            return await _context.Users.AnyAsync(u => u.Id == userId);
+        }
+
         public Task<bool> UpdateAsync(User entity)
         {
             throw new NotImplementedException();

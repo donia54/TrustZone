@@ -10,8 +10,8 @@ public interface IConversationService
     Task<ResponseResult<ConversationDTO>> GetByIdAsync(int id);
     Task<ResponseResult<IEnumerable<ConversationDTO>>> GetConversationsByUserIdAsync(string userId, int page = 1, int pageSize = 20);
     Task<ResponseResult<ConversationDTO>> GetConversationBetweenUsersAsync(string user1Id, string user2Id);
-    Task<ResponseResult> CreateAsync(string CurrentUser, CreateConversationDTO dto);
-    Task<ResponseResult> UpdateAsync(int id, UpdateConversationDTO dto);
+    Task<ResponseResult> CreateAsync(CreateConversationDTO dto);
+    Task<bool> UpdateLastMessageAtAsync(int id, DateTime LastMessageAt);
     Task<ResponseResult> DeleteAsync(int id);
 }
 
@@ -37,9 +37,9 @@ public class ConversationService : IConversationService
 
     public async Task<ResponseResult<IEnumerable<ConversationDTO>>> GetConversationsByUserIdAsync(string userId, int page = 1, int pageSize = 20)
     {
-        var user = await _userService.GetByIdAsync(userId);
-        if (user == null)
-            return ResponseResult<IEnumerable<ConversationDTO>>.NotFound("User not found.");
+        if(!_userService.IsCurrentUser(userId))
+            return ResponseResult<IEnumerable<ConversationDTO>>.NotFound("No conversations found here yet.");
+       
         var conversations = await _conversationRepository.GetConversationsByUserIdAsync(userId, page, pageSize);
         if (!conversations.Any())
             return ResponseResult<IEnumerable<ConversationDTO>>.NotFound("No conversations found here yet.");
@@ -50,14 +50,24 @@ public class ConversationService : IConversationService
 
     public async Task<ResponseResult<ConversationDTO>> GetConversationBetweenUsersAsync(string user1Id, string user2Id)
     {
+        if(!(_userService.IsCurrentUser(user1Id) || _userService.IsCurrentUser(user2Id))) 
+            return ResponseResult<ConversationDTO>.Error("You are not authorized to view this conversation if exists.", 403);
+
         var conversation = await _conversationRepository.GetConversationBetweenUsersAsync(user1Id, user2Id);
-        return conversation == null
-            ? ResponseResult<ConversationDTO>.NotFound("Conversation between users not found.")
-            : ResponseResult<ConversationDTO>.Success(_ConvertToDTO(conversation));
+        return conversation != null
+            ? ResponseResult<ConversationDTO>.Success(_ConvertToDTO(conversation))
+            : ResponseResult<ConversationDTO>.NotFound("No conversation between users yet.");
     }
 
-    public async Task<ResponseResult> CreateAsync(string CurrentUserId, CreateConversationDTO dto)
+    public async Task<ResponseResult> CreateAsync(CreateConversationDTO dto)
     {
+        var CurrentUserId = _userService.GetCurrentUser();
+        bool isUser1Exists = await _userService.IsUserExists(CurrentUserId);
+        bool isUser2Exists = await _userService.IsUserExists(dto.User2Id);
+
+        if (!(isUser1Exists && isUser1Exists))
+            return ResponseResult.Error("User not found.", 404);
+
         var conversation = new Conversation
         {
             User1Id = CurrentUserId,
@@ -71,28 +81,42 @@ public class ConversationService : IConversationService
             : ResponseResult.Error("Failed to create conversation.", 500);
     }
 
-    public async Task<ResponseResult> UpdateAsync(int id, UpdateConversationDTO dto)
+    public async Task<bool> UpdateLastMessageAtAsync(int id,DateTime LastMessageAt)
     {
         var conversation = await _conversationRepository.GetByIdAsync(id);
         if (conversation == null)
-            return ResponseResult.NotFound("Conversation not found.");
+            return false;
 
-        conversation.LastMessageAt = dto.LastMessageAt;
+        if(!IsCurrentUserInConversation(conversation))
+            return false;
 
-        var success = await _conversationRepository.UpdateAsync(conversation);
-        return success
-            ? ResponseResult.Success()
-            : ResponseResult.Error("Failed to update conversation.", 500);
+        conversation.LastMessageAt = LastMessageAt;
+
+        return await _conversationRepository.UpdateAsync(conversation);
     }
 
     public async Task<ResponseResult> DeleteAsync(int id)
-    {
-        var success = await _conversationRepository.DeleteAsync(id);
+    { 
+        // This will delete the conversation for both users. I think this is not the best way to do it.
+
+        var conversation = await _conversationRepository.GetByIdAsync(id);
+        if (conversation == null)
+            return ResponseResult.NotFound("Conversation not found.");
+        
+        if(!IsCurrentUserInConversation(conversation))
+            return ResponseResult.Error("You are not authorized to delete this conversation.", 403); // This is not a good message.
+
+        var success = await _conversationRepository.DeleteAsync(conversation);
         return success
             ? ResponseResult.Success()
-            : ResponseResult.NotFound("Conversation not found.");
+            : ResponseResult.Error("Failed to delete conversation.", 500);
     }
 
+    private bool IsCurrentUserInConversation(Conversation conversation)
+    {
+        // Check if the current user is either User1 or User2 in the conversation.
+        return _userService.IsCurrentUser(conversation.User1Id) || _userService.IsCurrentUser(conversation.User2Id);
+    }
     private static ConversationDTO _ConvertToDTO(Conversation conversation)
     {
         return new ConversationDTO
@@ -102,12 +126,12 @@ public class ConversationService : IConversationService
             User2Id = conversation.User2Id,
             CreatedAt = conversation.CreatedAt,
             LastMessageAt = conversation.LastMessageAt,
-            User1 = conversation.User1 != null ? new UserBasicDTO
+            User1 = conversation.User1 != null && conversation.User1.UserName != null ? new UserBasicDTO
             {
                 Id = conversation.User1.Id,
                 UserName = conversation.User1.UserName
             } : null,
-            User2 = conversation.User2 != null ? new UserBasicDTO
+            User2 = conversation.User2 != null && conversation.User2.UserName != null ? new UserBasicDTO
             {
                 Id = conversation.User2.Id,
                 UserName = conversation.User2.UserName

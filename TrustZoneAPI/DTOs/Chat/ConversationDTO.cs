@@ -19,7 +19,3 @@ public class CreateConversationDTO
     [Required(ErrorMessage = "User2Id is required.")]
     public string User2Id { get; set; } = null!;
 }
-public class UpdateConversationDTO
-{
-    public DateTime? LastMessageAt { get; set; }
-}

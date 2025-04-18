@@ -8,7 +8,7 @@ public interface IConversationRepository
     Task<Conversation?> GetByIdAsync(int id);
     Task<bool> AddAsync(Conversation entity);
     Task<bool> UpdateAsync(Conversation entity);
-    Task<bool> DeleteAsync(int id);
+    Task<bool> DeleteAsync(Conversation conversation);
     Task<IEnumerable<Conversation>> GetConversationsByUserIdAsync(string userId);
     Task<IEnumerable<Conversation>> GetConversationsByUserIdAsync(string userId, int page = 1, int pageSize = 20);
     Task<Conversation?> GetConversationBetweenUsersAsync(string user1Id, string user2Id);
@@ -42,12 +42,8 @@ public class ConversationRepository : IConversationRepository
         return await _context.SaveChangesAsync() > 0;
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Conversation conversation)
     {
-        var conversation = await _context.Conversations.FindAsync(id);
-        if (conversation == null)
-            return false;
-
         _context.Conversations.Remove(conversation);
         return await _context.SaveChangesAsync() > 0;
     }

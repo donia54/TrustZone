@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.BlazorIdentity.Pages;
-using System.IdentityModel.Tokens.Jwt;
+﻿using Microsoft.AspNetCore.Identity;
 using TrustZoneAPI.DTOs;
 using TrustZoneAPI.DTOs.User;
 using TrustZoneAPI.DTOs.Users;
@@ -16,6 +12,9 @@ namespace TrustZoneAPI.Services.Users
         Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model);
         Task<ResponseResult<AuthDTO>> LoginAsync(LoginDTO login);
         Task<User?> GetByIdAsync(string id);
+        bool IsCurrentUser(string userId);
+        Task<bool> IsUserExists(string userId);
+        string GetCurrentUser();
     }
     public class UserService : IUserService
     {
@@ -42,6 +41,10 @@ namespace TrustZoneAPI.Services.Users
         {
             string CurrentUserId = _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
             return CurrentUserId == userId;
+        }
+        public string GetCurrentUser()
+        {
+            return _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
         }
 
         public async Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model)
@@ -125,6 +128,11 @@ namespace TrustZoneAPI.Services.Users
         public Task<User?> GetByIdAsync(string id)
         {
             return _UserRepository.GetByIdAsync(id);
+        }
+
+        public async Task<bool> IsUserExists(string userId)
+        {
+            return await _UserRepository.IsUserExists(userId);
         }
     }
 }
