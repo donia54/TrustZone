@@ -12,9 +12,8 @@ public interface ITMessageRepository
     Task<bool> DeleteAsync(int id);
     Task<IEnumerable<TMessage>> GetMessagesByConversationAsync(int conversationId);
     Task<IEnumerable<TMessage>> GetMessagesByConversationAsync(int conversationId, int page = 1, int pageSize = 20);
-
-    Task<IEnumerable<TMessage>> GetMessagesBySenderAsync(string senderId);
     Task<bool> MarkAsReadAsync(int messageId);
+    Task<bool> MarkMessagesAsReadAsync(int conversationId, DateTime sentAt, string currentUserId);
 }
 public class MessageRepository : ITMessageRepository
 {
@@ -76,15 +75,6 @@ public class MessageRepository : ITMessageRepository
             .Take(pageSize)
             .ToListAsync();
     }
-    public async Task<IEnumerable<TMessage>> GetMessagesBySenderAsync(string senderId)
-    {
-        return await _context.TMessages
-            .Where(m => m.SenderId == senderId)
-            .Include(m => m.Conversation)
-            .OrderByDescending(m => m.SentAt)
-            .ToListAsync();
-    }
-
     public async Task<bool> MarkAsReadAsync(int messageId)
     {
         var message = await _context.TMessages.FindAsync(messageId);
@@ -95,4 +85,18 @@ public class MessageRepository : ITMessageRepository
         message.ReadAt = DateTime.UtcNow;
         return await _context.SaveChangesAsync() > 0;
     }
+    public async Task<bool> MarkMessagesAsReadAsync(int conversationId, DateTime sentAt, string currentUserId)
+    {
+        var query = _context.TMessages
+            .Where(m => m.ConversationId == conversationId && m.SentAt <= sentAt && m.SenderId != currentUserId);
+
+        await query.ForEachAsync(m =>
+        {
+            m.IsRead = true;
+            m.ReadAt = DateTime.UtcNow;
+        });
+
+        return await _context.SaveChangesAsync() > 0;
+    }
+
 }

@@ -14,8 +14,3 @@ public class ConversationDTO
     public UserBasicDTO? User2 { get; set; }
 }
 
-public class CreateConversationDTO
-{
-    [Required(ErrorMessage = "User2Id is required.")]
-    public string User2Id { get; set; } = null!;
-}

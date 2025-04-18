@@ -12,6 +12,7 @@ public interface IConversationRepository
     Task<IEnumerable<Conversation>> GetConversationsByUserIdAsync(string userId);
     Task<IEnumerable<Conversation>> GetConversationsByUserIdAsync(string userId, int page = 1, int pageSize = 20);
     Task<Conversation?> GetConversationBetweenUsersAsync(string user1Id, string user2Id);
+    Task<bool> IsConversationExists(int id);
 }
 public class ConversationRepository : IConversationRepository
 {
@@ -24,8 +25,6 @@ public class ConversationRepository : IConversationRepository
     public async Task<Conversation?> GetByIdAsync(int id)
     {
         return await _context.Conversations
-            .Include(c => c.User1)
-            .Include(c => c.User2)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
@@ -79,5 +78,10 @@ public class ConversationRepository : IConversationRepository
             .Include(c => c.User1)
             .Include(c => c.User2)
             .FirstOrDefaultAsync();
+    }
+
+    public async Task<bool> IsConversationExists(int id)
+    {
+        return await _context.Conversations.AnyAsync(c => c.Id == id);
     }
 }

@@ -2,32 +2,38 @@
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
+using TrustZoneAPI.Services.Conversations;
+using TrustZoneAPI.Services.Users;
 
 namespace TrustZoneAPI.Services.Messages;
 
+// Note: I need to organize UserId and CurrentUserId between UserSerivce and BaseController (When I reach there) Incha'Allah.
 public interface IMessageService
 {
     Task<ResponseResult<MessageDTO>> GetByIdAsync(int id);
     Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesByConversationAsync(int conversationId, int page = 1);
-    Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesBySenderAsync(string senderId);
-    Task<ResponseResult> CreateAsync(CreateMessageDTO dto, string CurrentUserId);
-    Task<ResponseResult> UpdateAsync(int id, string CurrentUserId, CreateMessageDTO dto);
+    Task<ResponseResult> CreateAsync(CreateMessageDTO dto);
+    Task<ResponseResult> UpdateAsync(int id, string CurrentUserId, UpdateMessageDTO dto);
     Task<ResponseResult> DeleteAsync(int id, string CurrentUserId);
-    Task<ResponseResult> MarkAsReadAsync(int messageId);
+    Task<ResponseResult> MarkAsReadAsync(int messageId); // I think this should be internal only.
 }
 
 public class MessageService : IMessageService
 {
-    private readonly ITMessageRepository _messageRepository;
-
-    public MessageService(ITMessageRepository messageRepository)
+    private readonly ITMessageRepository _repository;
+    private readonly IConversationService _conversationService;
+    private readonly IUserService _userService;
+    public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
+        ,IUserService userService)
     {
-        _messageRepository = messageRepository;
+        _repository = messageRepository;
+        _conversationService = conversationService;
+        _userService = userService;
     }
 
     public async Task<ResponseResult<MessageDTO>> GetByIdAsync(int id)
     {
-        var message = await _messageRepository.GetByIdAsync(id);
+        var message = await _repository.GetByIdAsync(id);
         return message == null
             ? ResponseResult<MessageDTO>.NotFound("Message not found.")
             : ResponseResult<MessageDTO>.Success(_ConvertToDTO(message));
@@ -35,51 +41,62 @@ public class MessageService : IMessageService
 
     public async Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesByConversationAsync(int conversationId, int page = 1)
     {
-        var messages = await _messageRepository.GetMessagesByConversationAsync(conversationId, page);
+        var IsAuthorized = await _conversationService.IsCurrentUserInConversation(conversationId); // I think this is not organizer well.
+        if (!IsAuthorized)
+            return ResponseResult<IEnumerable<MessageDTO>>.Error("You are not authorized to view this conversation or it is not exists.", 403);
+        
+        var messages = await _repository.GetMessagesByConversationAsync(conversationId, page);
         if (!messages.Any())
-            return ResponseResult<IEnumerable<MessageDTO>>.NotFound("No messages found for this conversation");
+            return ResponseResult<IEnumerable<MessageDTO>>.NotFound("No messages found for this conversation yet.");
 
         var messageDtos = messages.Select(_ConvertToDTO);
         return ResponseResult<IEnumerable<MessageDTO>>.Success(messageDtos);
     }
 
-    public async Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesBySenderAsync(string senderId)
+    public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto)
     {
-        var messages = await _messageRepository.GetMessagesBySenderAsync(senderId);
-        if (!messages.Any())
-            return ResponseResult<IEnumerable<MessageDTO>>.NotFound("No messages found for this sender");
+        // Note ye Donia: ConversationId preffered to be Guid or string as Guid.ToString(), not int.
+        int currentConversationId = dto.ConversationId;
+        if (currentConversationId == 0)
+        {
+           var result = await _conversationService.CreateAsync(dto.User2Id);
+            if(!result.IsSuccess)
+                return ResponseResult.Error($"{result.ErrorMessage}", result.StatusCode);
+            currentConversationId = result.Data;
+        }
+        //var IsConversationExists = await _conversationService.IsConversationExists(currentConversationId);
+        //if (!IsConversationExists)
+        //    return ResponseResult.Error("Conversation not found.", 404);
 
-        var messageDtos = messages.Select(_ConvertToDTO);
-        return ResponseResult<IEnumerable<MessageDTO>>.Success(messageDtos);
-    }
+        var IsAllowed = await _conversationService.IsCurrentUserInConversation(currentConversationId);
+        if(!IsAllowed)
+            return ResponseResult.Error("You are not authorized to view this conversation or it is not exists.", 403);
 
-    public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto,string CurrentUserId)
-    {
         var message = new TMessage
         {
             ConversationId = dto.ConversationId,
-            SenderId = CurrentUserId,
+            SenderId = _userService.GetCurrentUserId(), // I think this is not the best way.
             Content = dto.Content,
             IsRead = false
         };
 
-        var success = await _messageRepository.AddAsync(message);
+        var success = await _repository.AddAsync(message);
         return success 
             ? ResponseResult.Created() 
             : ResponseResult.Error("Failed to create message.", 500);
     }
 
-    public async Task<ResponseResult> UpdateAsync(int id, string CurrentUserId, CreateMessageDTO dto)
+    public async Task<ResponseResult> UpdateAsync(int id, UpdateMessageDTO dto)
     {
-        var message = await _messageRepository.GetByIdAsync(id);
+        var message = await _repository.GetByIdAsync(id);
         if (message == null) 
             return ResponseResult.NotFound("Message not found.");
 
-        if (!IsSender(message.SenderId, CurrentUserId))
-            return ResponseResult.NotFound("Message not found.");
+        if (_userService.IsCurrentUser(message.SenderId))
+            return ResponseResult.NotFound("You are not allowed to update this message.");
 
         message.Content = dto.Content;
-        var success = await _messageRepository.UpdateAsync(message);
+        var success = await _repository.UpdateAsync(message);
         return success 
             ? ResponseResult.Success() 
             : ResponseResult.Error("Failed to update message.", 500);
@@ -87,35 +104,18 @@ public class MessageService : IMessageService
 
     public async Task<ResponseResult> DeleteAsync(int id,string CurrentUserId)
     {
-        var message = await _messageRepository.GetByIdAsync(id);
-       
-        if(message == null)
+        var message = await _repository.GetByIdAsync(id);
+        if (message == null)
             return ResponseResult.NotFound("Message not found.");
+
+        if (_userService.IsCurrentUser(message.SenderId))
+            return ResponseResult.NotFound("You are not allowed to delete this message.");
         
-        if (!IsSender(message.SenderId, CurrentUserId))
-            return ResponseResult.NotFound("Message not found.");
-
-        var success = await _messageRepository.DeleteAsync(id);
+        var success = await _repository.DeleteAsync(id);
         return success 
             ? ResponseResult.Success() 
             : ResponseResult.NotFound("Message not found.");
     }
-
-    public async Task<ResponseResult> MarkAsReadAsync(int messageId)
-    {
-        var success = await _messageRepository.MarkAsReadAsync(messageId);
-        return success 
-            ? ResponseResult.Success() 
-            : ResponseResult.NotFound("Message not found.");
-    }
-
-
-    private bool IsSender(string senderId, string CurrentUserId)
-    {
-        return senderId == CurrentUserId;
-    }
-
-
     private static MessageDTO _ConvertToDTO(TMessage message)
     {
         return new MessageDTO
@@ -135,4 +135,24 @@ public class MessageService : IMessageService
             } : null
         };
     }
+    public async Task<ResponseResult> MarkAsReadAsync(int messageId)
+    {
+        // هاذ بدها شوية شغل... خليها لحد ما أجهّز السيجنال آر بتوضح الأمور وقتها إن شاء الله
+        var message = await _repository.GetByIdAsync(messageId);
+        if (message == null)
+            return ResponseResult.NotFound("Message not found.");
+
+        var isAuthorized = await _conversationService.IsCurrentUserInConversation(message.ConversationId);
+        if (!isAuthorized)
+            return ResponseResult.Error("You are not authorized to mark messages as read in this conversation.", 403);
+
+        var currentUserId = _userService.GetCurrentUserId();
+
+        // تحديث الرسائل باستخدام استعلام SQL مباشر
+        var success = await _repository.MarkMessagesAsReadAsync(message.ConversationId, message.SentAt, currentUserId);
+        return success
+            ? ResponseResult.Success()
+            : ResponseResult.Error("Failed to mark messages as read.", 500);
+    }
+
 }

@@ -14,7 +14,7 @@ namespace TrustZoneAPI.Services.Users
         Task<User?> GetByIdAsync(string id);
         bool IsCurrentUser(string userId);
         Task<bool> IsUserExists(string userId);
-        string GetCurrentUser();
+        string GetCurrentUserId();
     }
     public class UserService : IUserService
     {
@@ -42,7 +42,7 @@ namespace TrustZoneAPI.Services.Users
             string CurrentUserId = _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
             return CurrentUserId == userId;
         }
-        public string GetCurrentUser()
+        public string GetCurrentUserId()
         {
             return _HttpContextAccessor.HttpContext?.Items["UserId"] as string ?? string.Empty;
         }
