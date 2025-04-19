@@ -43,7 +43,7 @@ namespace TrustZoneAPI.Services.Users
             _userManager = userManager;
             _blobService = blobService;
             _userRepository = userRepository;
-            _userdisability = _userdisability;
+            _userdisability = userdisability;
         }
 
 
@@ -170,6 +170,8 @@ namespace TrustZoneAPI.Services.Users
         private async Task<List<DisabilityTypeDTO>> _GetUserDisabilityTypesAsync(string userId)
         {
             var types = await _userdisability.GetUserDisabilitiesByUserIdAsync(userId);
+            if (types == null || types.Data == null || !types.Data.Any())
+                return new List<DisabilityTypeDTO>();
             var disabilityTypeDTOs = types.Data.Select(t => new DisabilityTypeDTO
             {
                 Id = t.Id,
