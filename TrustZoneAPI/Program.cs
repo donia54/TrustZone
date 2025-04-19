@@ -147,9 +147,6 @@ builder.Services.AddSwaggerGen();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-
-var app = builder.Build();
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -159,6 +156,10 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
+
+
+var app = builder.Build();
+
 
 app.UseCors();
 
