@@ -18,18 +18,16 @@ namespace TrustZoneAPI.Services.Azure
         private readonly BlobServiceClient _blobServiceClient;
         private readonly BlobContainerClient _blobContainerClient;
         // private readonly ILogService _LogService;
-        private readonly string _storageAccountName;
-        private readonly string _storageAccountKey;
+        private readonly string _storageAccountName = "trustzone";
+        private readonly string _storageAccountKey = "1A3ImHdE0ddzyoRanGXFqVzrK/J8AgEjY3VaApibvY8TJNlnEzExGr5s3IU1vKaMRyJFtOJymlxs+AStUiKFvg==";
+
         private readonly IUserRepository _userRepository;
 
 
         public BlobService(IUserRepository userRepository, IConfiguration configuration)
         {
-            string connectionString = configuration["AzureBlob:ConnectionString"];
-            string containerName = configuration["AzureBlob:ContainerName"];
-            _storageAccountName = configuration["AzureBlob:AccountName"];
-            _storageAccountKey = configuration["AzureBlob:AccountKey"];
-
+            string connectionString = "DefaultEndpointsProtocol=https;AccountName=trustzone;AccountKey=1A3ImHdE0ddzyoRanGXFqVzrK/J8AgEjY3VaApibvY8TJNlnEzExGr5s3IU1vKaMRyJFtOJymlxs+AStUiKFvg==;EndpointSuffix=core.windows.net";
+            string containerName = "profile-pictures";
 
             _blobServiceClient = new BlobServiceClient(connectionString);
             _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);

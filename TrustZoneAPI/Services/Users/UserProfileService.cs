@@ -128,12 +128,14 @@ namespace TrustZoneAPI.Services.Users
                 return ResponseResult<string>.Error("Only image files (JPG, JPEG, PNG, GIF) are allowed", 400);
 
             var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
-            var newFileName = $"{type}-pictures/{userId}/{Guid.NewGuid()}{fileExtension}";
+            //var originalNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            fileName = $"{Guid.NewGuid()}{fileExtension}";
 
-            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(newFileName);
+
+            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(fileName);
 
             return sasUrl != null
-                ? ResponseResult<string>.Success(newFileName)
+                ? ResponseResult<string>.Success(sasUrl)
                 : ResponseResult<string>.Error($"Couldn't generate {type} picture upload link", 500);
         }
 
