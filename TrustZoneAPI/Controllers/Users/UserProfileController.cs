@@ -46,19 +46,19 @@ namespace TrustZoneAPI.Controllers.Users
 
 
         [Authorize]
-        [HttpGet("generateProfilePictureUploadSas/{fileName}")]
-        public async Task<ActionResult> GenerateProfilePictureUploadSasUrl( string fileName)
+        [HttpGet("generateProfilePictureUploadSas")]
+        public async Task<ActionResult> GenerateProfilePictureUploadSasUrl()
         {
-            var response = await _userProfileService.GenerateProfilePictureUploadSasUrlAsync(CurrentUserId, fileName);
+            var response = await _userProfileService.GenerateProfilePictureUploadSasUrlAsync();
             return MapResponseToActionResult(response);
         }
 
 
         [Authorize]
-        [HttpGet("generateCoverPictureUploadSas/{fileName}")]
-        public async Task<ActionResult> GenerateCoverPictureUploadSasUrl( string fileName)
+        [HttpGet("generateCoverPictureUploadSas")]
+        public async Task<ActionResult> GenerateCoverPictureUploadSasUrl()
         {
-            var response = await _userProfileService.GenerateCoverPictureUploadSasUrlAsync(CurrentUserId, fileName);
+            var response = await _userProfileService.GenerateCoverPictureUploadSasUrlAsync();
             return MapResponseToActionResult(response);
         }
 

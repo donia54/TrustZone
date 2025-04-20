@@ -13,12 +13,12 @@ namespace TrustZoneAPI.Services.Users
     public interface IUserProfileService
     {
         // Profile Picture Operations
-        Task<ResponseResult<string>> GenerateProfilePictureUploadSasUrlAsync(string userId, string fileName);
+        Task<ResponseResult<string>> GenerateProfilePictureUploadSasUrlAsync();
         Task<ResponseResult> UpdateProfilePictureAsync(string userId, string fileName);
         Task<ResponseResult<string>> GetProfilePictureUrlAsync(string userId);
 
         // Cover Picture Operations
-        Task<ResponseResult<string>> GenerateCoverPictureUploadSasUrlAsync(string userId, string fileName);
+        Task<ResponseResult<string>> GenerateCoverPictureUploadSasUrlAsync();
         Task<ResponseResult> UpdateCoverPictureAsync(string userId, string fileName);
         Task<ResponseResult<string>> GetCoverPictureUrlAsync(string userId);
 
@@ -49,11 +49,11 @@ namespace TrustZoneAPI.Services.Users
 
 
 
-        public async Task<ResponseResult<string>> GenerateProfilePictureUploadSasUrlAsync(string userId, string fileName)
-            => await _GenerateUploadPictureSasUrlAsync(userId, fileName, "profile");
+        public async Task<ResponseResult<string>> GenerateProfilePictureUploadSasUrlAsync()
+            => await _GenerateUploadPictureSasUrlAsync("profile");
 
-        public async Task<ResponseResult<string>> GenerateCoverPictureUploadSasUrlAsync(string userId, string fileName)
-            => await _GenerateUploadPictureSasUrlAsync(userId, fileName, "cover");
+        public async Task<ResponseResult<string>> GenerateCoverPictureUploadSasUrlAsync()
+            => await _GenerateUploadPictureSasUrlAsync( "cover");
 
         public async Task<ResponseResult> UpdateProfilePictureAsync(string userId, string fileName)
             => await _UpdatePictureAsync(userId, fileName, "profile");
@@ -106,10 +106,10 @@ namespace TrustZoneAPI.Services.Users
                 return ResponseResult<UserProfileDTO>.NotFound("User not found");
 
             var profilePictureUrl = string.IsNullOrEmpty(user.ProfilePicture) ? null
-                : await _blobService.GeneratePictureLoadSasUrlAsync(user.ProfilePicture);
+                : await GenerateProfilePictureUploadSasUrlAsync();
 
             var coverPictureUrl = string.IsNullOrEmpty(user.CoverPicture) ? null
-                : await _blobService.GeneratePictureLoadSasUrlAsync(user.CoverPicture);   //to minimize the number of frontend calls.
+                : await GenerateProfilePictureUploadSasUrlAsync();   //to minimize the number of frontend calls.
 
             var dto = await _MapToDTO(user);
 
@@ -118,18 +118,9 @@ namespace TrustZoneAPI.Services.Users
             return ResponseResult<UserProfileDTO>.Success(dto);
         }
 
-        private async Task<ResponseResult<string>> _GenerateUploadPictureSasUrlAsync(string userId, string fileName, string type)
+        private async Task<ResponseResult<string>> _GenerateUploadPictureSasUrlAsync(string type)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-            if (user == null)
-                return ResponseResult<string>.NotFound("User not found");
-
-            if (!_ValidatePictureFileType(fileName))
-                return ResponseResult<string>.Error("Only image files (JPG, JPEG, PNG, GIF) are allowed", 400);
-
-            var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
-            //var originalNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-            fileName = $"{Guid.NewGuid()}{fileExtension}";
+            var fileName = $"{Guid.NewGuid()}";
 
 
             var sasUrl = await _blobService.GenerateUploadSasUrlAsync(fileName);
