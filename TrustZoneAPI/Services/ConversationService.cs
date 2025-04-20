@@ -1,7 +1,7 @@
 ﻿using TrustZoneAPI.DTOs.Chat;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Services.Repositories;
+using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Services.Users;
 
 namespace TrustZoneAPI.Services.Conversations;

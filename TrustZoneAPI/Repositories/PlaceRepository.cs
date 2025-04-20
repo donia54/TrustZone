@@ -5,9 +5,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
-using TrustZoneAPI.Services.Repositories.Interfaces;
+using TrustZoneAPI.Repositories.Interfaces;
 
-namespace TrustZoneAPI.Services.Repositories
+namespace TrustZoneAPI.Repositories
 {
     public class PlaceRepository : IPlaceRepository
     {

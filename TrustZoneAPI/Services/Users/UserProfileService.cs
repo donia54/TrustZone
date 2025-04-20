@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
+using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Azure;
 using TrustZoneAPI.Services.Disabilities;
-using TrustZoneAPI.Services.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Users
 {
@@ -128,14 +128,12 @@ namespace TrustZoneAPI.Services.Users
                 return ResponseResult<string>.Error("Only image files (JPG, JPEG, PNG, GIF) are allowed", 400);
 
             var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
-            //var originalNameWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
-            fileName = $"{Guid.NewGuid()}{fileExtension}";
+            var newFileName = $"{type}-pictures/{userId}/{Guid.NewGuid()}{fileExtension}";
 
-
-            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(fileName);
+            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(newFileName);
 
             return sasUrl != null
-                ? ResponseResult<string>.Success(sasUrl)
+                ? ResponseResult<string>.Success(newFileName)
                 : ResponseResult<string>.Error($"Couldn't generate {type} picture upload link", 500);
         }
 

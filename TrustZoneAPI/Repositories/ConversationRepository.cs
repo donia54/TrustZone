@@ -2,7 +2,7 @@
 using TrustZoneAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TrustZoneAPI.Services.Repositories;
+namespace TrustZoneAPI.Repositories;
 public interface IConversationRepository
 {
     Task<Conversation?> GetByIdAsync(int id);

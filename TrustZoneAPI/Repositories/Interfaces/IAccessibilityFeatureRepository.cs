@@ -1,6 +1,6 @@
 ﻿using TrustZoneAPI.Models;
 
-namespace TrustZoneAPI.Services.Repositories.Interfaces
+namespace TrustZoneAPI.Repositories.Interfaces
 {
     public interface IAccessibilityFeatureRepository :IRepository<AccessibilityFeature,int>
     {

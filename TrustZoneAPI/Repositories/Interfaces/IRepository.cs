@@ -1,4 +1,4 @@
-﻿namespace TrustZoneAPI.Services.Repositories.Interfaces
+﻿namespace TrustZoneAPI.Repositories.Interfaces
 {
     public interface IRepository<T, TKey> where T : class
     {

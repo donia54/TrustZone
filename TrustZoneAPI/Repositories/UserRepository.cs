@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using TrustZoneAPI.Data;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Services.Repositories.Interfaces;
+using TrustZoneAPI.Repositories.Interfaces;
 
-namespace TrustZoneAPI.Services.Repositories
+namespace TrustZoneAPI.Repositories
 {
     public class UserRepository : IUserRepository
     {

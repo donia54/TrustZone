@@ -2,7 +2,7 @@
 using TrustZoneAPI.Data;
 using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Services.Repositories.Interfaces;
+using TrustZoneAPI.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Places
 {

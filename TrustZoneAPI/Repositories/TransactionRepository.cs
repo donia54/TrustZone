@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 using TrustZoneAPI.Data;
-using TrustZoneAPI.Services.Repositories.Interfaces;
+using TrustZoneAPI.Repositories.Interfaces;
 
-namespace TrustZoneAPI.Services.Repositories
+namespace TrustZoneAPI.Repositories
 {
     public class TransactionRepository : ITransactionRepository
     {

@@ -17,8 +17,8 @@ using TrustZoneAPI.Services.Azure;
 using TrustZoneAPI.Services.Disabilities;
 using TrustZoneAPI.Services.Conversations;
 using TrustZoneAPI.Services.Messages;
-using TrustZoneAPI.Services.Repositories;
-using TrustZoneAPI.Services.Repositories.Interfaces;
+using TrustZoneAPI.Repositories;
+using TrustZoneAPI.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,9 +65,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IUserDisabilityRepository, UserDisabilityRepository>();
 builder.Services.AddScoped<IUserDisabilityService, UserDisabilityService>();
-builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
-builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
-
 
 
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
