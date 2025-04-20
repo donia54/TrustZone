@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Azure;
 using TrustZoneAPI.Services.Disabilities;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Users
 {
@@ -43,7 +43,7 @@ namespace TrustZoneAPI.Services.Users
             _userManager = userManager;
             _blobService = blobService;
             _userRepository = userRepository;
-            _userdisability = userdisability;
+            _userdisability = _userdisability;
         }
 
 
@@ -170,8 +170,6 @@ namespace TrustZoneAPI.Services.Users
         private async Task<List<DisabilityTypeDTO>> _GetUserDisabilityTypesAsync(string userId)
         {
             var types = await _userdisability.GetUserDisabilitiesByUserIdAsync(userId);
-            if (types == null || types.Data == null || !types.Data.Any())
-                return new List<DisabilityTypeDTO>();
             var disabilityTypeDTOs = types.Data.Select(t => new DisabilityTypeDTO
             {
                 Id = t.Id,

@@ -2,7 +2,7 @@
 using TrustZoneAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TrustZoneAPI.Repositories;
+namespace TrustZoneAPI.Services.Repositories;
 public interface IConversationRepository
 {
     Task<Conversation?> GetByIdAsync(int id);
@@ -73,8 +73,8 @@ public class ConversationRepository : IConversationRepository
     public async Task<Conversation?> GetConversationBetweenUsersAsync(string user1Id, string user2Id)
     {
         return await _context.Conversations
-            .Where(c => (c.User1Id == user1Id && c.User2Id == user2Id) ||
-                        (c.User1Id == user2Id && c.User2Id == user1Id))
+            .Where(c => c.User1Id == user1Id && c.User2Id == user2Id ||
+                        c.User1Id == user2Id && c.User2Id == user1Id)
             .Include(c => c.User1)
             .Include(c => c.User2)
             .FirstOrDefaultAsync();

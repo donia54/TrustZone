@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TrustZoneAPI.Data;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
-namespace TrustZoneAPI.Repositories
+namespace TrustZoneAPI.Services.Repositories
 {
     public class PlaceRepository : IPlaceRepository
     {

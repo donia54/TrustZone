@@ -5,8 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TrustZoneAPI.Data;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
-using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Services;
 using TrustZoneAPI.Services.Misc;
 using TrustZoneAPI.Services.Users;
@@ -19,6 +17,8 @@ using TrustZoneAPI.Services.Azure;
 using TrustZoneAPI.Services.Disabilities;
 using TrustZoneAPI.Services.Conversations;
 using TrustZoneAPI.Services.Messages;
+using TrustZoneAPI.Services.Repositories;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

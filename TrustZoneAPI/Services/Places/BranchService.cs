@@ -1,6 +1,6 @@
 ﻿using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 using static TrustZoneAPI.DTOs.Places.ReviewsDTOs;
 
 namespace TrustZoneAPI.Services.Places

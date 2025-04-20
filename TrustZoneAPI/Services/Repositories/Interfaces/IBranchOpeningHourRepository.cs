@@ -1,6 +1,6 @@
 ﻿using TrustZoneAPI.Models;
 
-namespace TrustZoneAPI.Repositories.Interfaces
+namespace TrustZoneAPI.Services.Repositories.Interfaces
 {
     public interface IBranchOpeningHourRepository : IRepository<BranchOpeningHour,int>
     {

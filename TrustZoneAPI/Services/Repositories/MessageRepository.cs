@@ -2,7 +2,7 @@
 using TrustZoneAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace TrustZoneAPI.Repositories;
+namespace TrustZoneAPI.Services.Repositories;
 public interface ITMessageRepository
 {
     Task<IEnumerable<TMessage>> GetAllAsync();

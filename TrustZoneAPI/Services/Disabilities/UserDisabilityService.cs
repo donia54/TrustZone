@@ -1,6 +1,6 @@
 ﻿using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Disabilities
 {

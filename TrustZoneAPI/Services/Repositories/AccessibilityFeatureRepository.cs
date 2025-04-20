@@ -1,4 +1,4 @@
-﻿namespace TrustZoneAPI.Repositories
+﻿namespace TrustZoneAPI.Services.Repositories
 {
     public class AccessibilityFeatureRepository
     {

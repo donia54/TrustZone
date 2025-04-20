@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
-using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Places
 {

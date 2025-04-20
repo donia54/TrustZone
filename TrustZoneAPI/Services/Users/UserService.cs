@@ -3,7 +3,7 @@ using TrustZoneAPI.DTOs;
 using TrustZoneAPI.DTOs.User;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services.Users
 {

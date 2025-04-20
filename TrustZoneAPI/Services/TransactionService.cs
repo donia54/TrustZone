@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
-using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
 namespace TrustZoneAPI.Services
 {

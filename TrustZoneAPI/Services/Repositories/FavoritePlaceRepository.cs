@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using TrustZoneAPI.Data;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Repositories.Interfaces;
 
-namespace TrustZoneAPI.Repositories
+namespace TrustZoneAPI.Services.Repositories
 {
     public class FavoritePlaceRepository:IFavoritePlaceRepository
     {
