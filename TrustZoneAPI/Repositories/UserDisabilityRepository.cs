@@ -14,9 +14,10 @@ namespace TrustZoneAPI.Repositories
         {
             _context = context;
         }
-        public Task<bool> AddAsync(UserDisability entity)
+        public async Task<bool> AddAsync(UserDisability entity)
         {
-            throw new NotImplementedException();
+            _context.UserDisabilities.Add(entity);
+           return  await _context.SaveChangesAsync() > 0;
         }
 
         public Task<bool> DeleteAsync(int id)

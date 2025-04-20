@@ -65,6 +65,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IUserDisabilityRepository, UserDisabilityRepository>();
 builder.Services.AddScoped<IUserDisabilityService, UserDisabilityService>();
+builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
+builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
+
 
 
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
