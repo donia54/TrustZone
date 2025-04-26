@@ -11,7 +11,7 @@ namespace TrustZoneAPI.Repositories
         {
             _context = context;
         }
-        public virtual async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public virtual async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
         {
             return await _context.Database.BeginTransactionAsync();
         }

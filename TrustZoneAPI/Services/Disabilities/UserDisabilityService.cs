@@ -2,7 +2,6 @@
 using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories.Interfaces;
-using TrustZoneAPI.Services.Users;
 
 namespace TrustZoneAPI.Services.Disabilities
 {
@@ -18,14 +17,10 @@ namespace TrustZoneAPI.Services.Disabilities
     public class UserDisabilityService: IUserDisabilityService
     {
         private readonly IUserDisabilityRepository _userDisabilityRepository;
-        private readonly IDisabilityTypeService _disabilityTypeService;
-       // private readonly IUserService _userservice;
 
-        public UserDisabilityService(IUserDisabilityRepository userDisabilityRepository, IDisabilityTypeService disabilityTypeService)
+        public UserDisabilityService(IUserDisabilityRepository userDisabilityRepository)
         {
             _userDisabilityRepository = userDisabilityRepository;
-            _disabilityTypeService = disabilityTypeService;
-           // _userservice = userService;
 
         }
 

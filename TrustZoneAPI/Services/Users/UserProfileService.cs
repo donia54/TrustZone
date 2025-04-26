@@ -43,7 +43,7 @@ namespace TrustZoneAPI.Services.Users
             _userManager = userManager;
             _blobService = blobService;
             _userRepository = userRepository;
-            _userdisability = userdisability;
+            _userdisability = _userdisability;
         }
 
 
@@ -126,11 +126,12 @@ namespace TrustZoneAPI.Services.Users
         {
             var fileName = $"{Guid.NewGuid()}";
 
+            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(newFileName);
 
             var sasUrl = await _blobService.GenerateUploadSasUrlAsync("profile-pictures", fileName);
 
             return sasUrl != null
-                ? ResponseResult<string>.Success(sasUrl)
+                ? ResponseResult<string>.Success(newFileName)
                 : ResponseResult<string>.Error($"Couldn't generate {type} picture upload link", 500);
         }
 
@@ -167,8 +168,6 @@ namespace TrustZoneAPI.Services.Users
         private async Task<List<DisabilityTypeDTO>> _GetUserDisabilityTypesAsync(string userId)
         {
             var types = await _userdisability.GetUserDisabilitiesByUserIdAsync(userId);
-            if (types == null || types.Data == null || !types.Data.Any())
-                return new List<DisabilityTypeDTO>();
             var disabilityTypeDTOs = types.Data.Select(t => new DisabilityTypeDTO
             {
                 Id = t.Id,

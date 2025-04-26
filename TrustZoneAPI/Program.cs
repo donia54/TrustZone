@@ -5,8 +5,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TrustZoneAPI.Data;
 using TrustZoneAPI.Models;
-using TrustZoneAPI.Repositories.Interfaces;
-using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Services;
 using TrustZoneAPI.Services.Misc;
 using TrustZoneAPI.Services.Users;

@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.Data;
 using TrustZoneAPI.DTOs;
-using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.DTOs.User;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories.Interfaces;
-using TrustZoneAPI.Services.Disabilities;
 
 namespace TrustZoneAPI.Services.Users
 {
@@ -14,8 +11,6 @@ namespace TrustZoneAPI.Services.Users
     {
         Task<ResponseResult<AuthDTO>> RegisterUserAsync(RegistrUserIdentity model);
         Task<ResponseResult<AuthDTO>> LoginAsync(LoginDTO login);
-
-
         Task<User?> GetByIdAsync(string id);
         bool IsCurrentUser(string userId);
         Task<bool> IsUserExists(string userId);
@@ -35,12 +30,11 @@ namespace TrustZoneAPI.Services.Users
         private readonly IAuthService _AuthService;
         private readonly SignInManager<User> _SignInManager;
         private readonly IUserRepository _UserRepository;
-        private readonly IUserDisabilityService _UserDisabilityService;
         IHttpContextAccessor _HttpContextAccessor;
 
         public UserService(UserManager<User> userManager,ITransactionService transactionService,
             IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository
-            , IHttpContextAccessor httpContextAccessor, IUserDisabilityService userDisabilityService)
+            , IHttpContextAccessor httpContextAccessor)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
@@ -48,7 +42,7 @@ namespace TrustZoneAPI.Services.Users
             _SignInManager = signInManager;
             _UserRepository = userRepository;
             _HttpContextAccessor = httpContextAccessor;
-            _UserDisabilityService = userDisabilityService;
+
             _userRepository = userRepository;
         }
         public bool IsCurrentUser(string userId)
@@ -83,11 +77,6 @@ namespace TrustZoneAPI.Services.Users
                 //here i will manage the roles topic int the future 
 
                 var RolesAdded = await _UserManager.AddToRoleAsync(user, "User");
-                await _UserDisabilityService.AddAsync(new UserDisabilityCreateDTO
-                {
-                    DisabilityTypeId = model.DisabilityTypeId,
-                    UserId = user.Id
-                });
                 if (!RolesAdded.Succeeded)
                 {
                     return ResponseResult<AuthDTO>.Error($"Failed to add role to user", 500);
