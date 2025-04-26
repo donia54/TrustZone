@@ -18,10 +18,12 @@ namespace TrustZoneAPI.Services.Disabilities
     {
         private readonly IUserDisabilityRepository _userDisabilityRepository;
 
-        public UserDisabilityService(IUserDisabilityRepository userDisabilityRepository)
+        private readonly IDisabilityTypeService _disabilityTypeService;
+
+        public UserDisabilityService(IUserDisabilityRepository userDisabilityRepository, IDisabilityTypeService disabilityTypeService)
         {
             _userDisabilityRepository = userDisabilityRepository;
-
+            _disabilityTypeService = disabilityTypeService;
         }
 
 

@@ -53,12 +53,16 @@ namespace TrustZoneAPI.DTOs.Users
 
     public class UpdateUserProfileDTO
     {
+        [Required]
         [StringLength(50, ErrorMessage = "Username can't be longer than 50 characters")]
         public string? UserName { get; set; }
 
+        [Required]
         [EmailAddress(ErrorMessage = "Invalid email format")]
         public string? Email { get; set; }
 
+
+        [Required]
         [Range(1, 120, ErrorMessage = "Age must be between 1 and 120")]
         public int? Age { get; set; }
     }

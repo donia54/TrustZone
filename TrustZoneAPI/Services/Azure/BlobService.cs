@@ -1,7 +1,5 @@
 ﻿using Azure.Storage.Blobs;
 using Azure.Storage;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Azure.Storage.Sas;
 using TrustZoneAPI.Repositories.Interfaces;
 
@@ -17,22 +15,23 @@ namespace TrustZoneAPI.Services.Azure
     public class BlobService :IBlobService
     {
         private readonly BlobServiceClient _blobServiceClient;
-        private readonly BlobContainerClient _blobContainerClient;
+       // private readonly BlobContainerClient _blobContainerClient;
         // private readonly ILogService _LogService;
         private readonly string _storageAccountName = "trustzone";
         private readonly string _storageAccountKey = "1A3ImHdE0ddzyoRanGXFqVzrK/J8AgEjY3VaApibvY8TJNlnEzExGr5s3IU1vKaMRyJFtOJymlxs+AStUiKFvg==";
 
+
         private readonly IUserRepository _userRepository;
-        private readonly IReviewRepository _reviewRepository;
+      
 
 
-        public BlobService(IUserRepository userRepository,IReviewRepository reviewRepository)
+        public BlobService(IUserRepository userRepository)
         {
             string connectionString = "DefaultEndpointsProtocol=https;AccountName=trustzone;AccountKey=1A3ImHdE0ddzyoRanGXFqVzrK/J8AgEjY3VaApibvY8TJNlnEzExGr5s3IU1vKaMRyJFtOJymlxs+AStUiKFvg==;EndpointSuffix=core.windows.net";
             _blobServiceClient = new BlobServiceClient(connectionString);
  
             _userRepository = userRepository;
-            _reviewRepository = reviewRepository;
+           
         }
 
 
@@ -103,7 +102,7 @@ namespace TrustZoneAPI.Services.Azure
         }
 
 
-        public string ExtractBlobName(string url)
+       public string ExtractBlobName(string url)
         {
             try
             {

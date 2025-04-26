@@ -19,6 +19,8 @@ using TrustZoneAPI.Services.Conversations;
 using TrustZoneAPI.Services.Messages;
 using TrustZoneAPI.Services.AccessibilityFeatures;
 using TrustZoneAPI.Services.Events;
+using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 

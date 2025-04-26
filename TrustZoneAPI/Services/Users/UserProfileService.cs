@@ -43,7 +43,7 @@ namespace TrustZoneAPI.Services.Users
             _userManager = userManager;
             _blobService = blobService;
             _userRepository = userRepository;
-            _userdisability = _userdisability;
+            _userdisability = userdisability;
         }
 
 
@@ -126,12 +126,11 @@ namespace TrustZoneAPI.Services.Users
         {
             var fileName = $"{Guid.NewGuid()}";
 
-            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(newFileName);
 
             var sasUrl = await _blobService.GenerateUploadSasUrlAsync("profile-pictures", fileName);
 
             return sasUrl != null
-                ? ResponseResult<string>.Success(newFileName)
+                ? ResponseResult<string>.Success(sasUrl)
                 : ResponseResult<string>.Error($"Couldn't generate {type} picture upload link", 500);
         }
 
@@ -200,11 +199,6 @@ namespace TrustZoneAPI.Services.Users
             };
         }
 
-        private bool _ValidatePictureFileType(string fileName)
-        {
-            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".WebP", ".SVG" };
-            var fileExtension = Path.GetExtension(fileName).ToLowerInvariant();
-            return allowedExtensions.Contains(fileExtension);
-        }
+    
     }
 }
