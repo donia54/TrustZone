@@ -10,8 +10,9 @@ namespace TrustZoneAPI.Services.Azure
 
     public interface IBlobService
     {
-        Task<string> GenerateUploadSasUrlAsync(string fileName);
-        Task<string> GeneratePictureLoadSasUrlAsync(string PicturePath);
+        string ExtractBlobName(string url);
+        Task<string> GenerateUploadSasUrlAsync(string containerName, string fileName);
+        Task<string> GeneratePictureLoadSasUrlAsync(string containerName, string blobPath);
     }
     public class BlobService :IBlobService
     {
@@ -22,29 +23,37 @@ namespace TrustZoneAPI.Services.Azure
         private readonly string _storageAccountKey = "1A3ImHdE0ddzyoRanGXFqVzrK/J8AgEjY3VaApibvY8TJNlnEzExGr5s3IU1vKaMRyJFtOJymlxs+AStUiKFvg==";
 
         private readonly IUserRepository _userRepository;
+        private readonly IReviewRepository _reviewRepository;
 
 
-        public BlobService(IUserRepository userRepository, IConfiguration configuration)
+        public BlobService(IUserRepository userRepository,IReviewRepository reviewRepository)
         {
             string connectionString = "DefaultEndpointsProtocol=https;AccountName=trustzone;AccountKey=1A3ImHdE0ddzyoRanGXFqVzrK/J8AgEjY3VaApibvY8TJNlnEzExGr5s3IU1vKaMRyJFtOJymlxs+AStUiKFvg==;EndpointSuffix=core.windows.net";
-            string containerName = "profile-pictures";
-
             _blobServiceClient = new BlobServiceClient(connectionString);
-            _blobContainerClient = _blobServiceClient.GetBlobContainerClient(containerName);
+ 
             _userRepository = userRepository;
+            _reviewRepository = reviewRepository;
         }
 
 
-        public async Task<string> GenerateUploadSasUrlAsync(string fileName)
+        private BlobContainerClient GetContainerClient(string containerName)
+        {
+            return _blobServiceClient.GetBlobContainerClient(containerName);
+        }
+
+
+        public async Task<string> GenerateUploadSasUrlAsync(string containerName, string fileName)
         {
             // Ensure file name follows your preferred naming conventions
+            var containerClient = GetContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(fileName);
 
-            var blobClient = _blobContainerClient.GetBlobClient(fileName);
+          
 
             // Set SAS Token permissions: Allow write and create
             var sasBuilder = new BlobSasBuilder
             {
-                BlobContainerName = _blobContainerClient.Name,
+                BlobContainerName = containerName,
                 BlobName = fileName,
                 ExpiresOn = DateTimeOffset.UtcNow.AddHours(1) // Set expiration
             };
@@ -59,15 +68,16 @@ namespace TrustZoneAPI.Services.Azure
         }
 
 
-        public async Task<string> GeneratePictureLoadSasUrlAsync(string PicturePath)
+        public async Task<string> GeneratePictureLoadSasUrlAsync(string containerName, string PicturePath)
         {
             if (PicturePath == null)
                 throw new Exception("Picture path is null");
 
-            
-            var blobClient = _blobContainerClient.GetBlobClient(PicturePath);
 
-            
+            var containerClient = GetContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(PicturePath);
+
+
             var exists = await blobClient.ExistsAsync();
             if (!exists)
             {
@@ -78,7 +88,7 @@ namespace TrustZoneAPI.Services.Azure
          
             var sasBuilder = new BlobSasBuilder
             {
-                BlobContainerName = _blobContainerClient.Name,
+                BlobContainerName = containerName,
                 BlobName = PicturePath,
                 ExpiresOn = DateTimeOffset.UtcNow.AddHours(24) // temp
             };
@@ -91,6 +101,29 @@ namespace TrustZoneAPI.Services.Azure
 
             return sasUri;
         }
+
+
+        public string ExtractBlobName(string url)
+        {
+            try
+            {
+                var uri = new Uri(url);
+                var segments = uri.Segments;
+
+                if (segments.Length >= 2)
+                {
+                   
+                    return segments.Last().Split('?')[0]; 
+                }
+
+                return  null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
 
     }
 }

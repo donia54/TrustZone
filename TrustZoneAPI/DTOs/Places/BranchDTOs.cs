@@ -11,13 +11,17 @@ namespace TrustZoneAPI.DTOs.Places
     public class BranchDTO
     {
         public int Id { get; set; }
-        public int PlaceId { get; set; }
+
+        //public int PlaceId { get; set; }
         public string Address { get; set; } = null!;
         public string? Website { get; set; }
         public string? Phone { get; set; }
 
-        public List<BranchOpeningHourDTO>? OpiningHours { get; set; }
         public DateTime CreatedAt { get; set; }
+        public List<BranchOpeningHourDTO>? OpiningHours { get; set; }
+
+        public PlaceBranchDTO Place { get; set; } = null!;
+   
     }
 
     

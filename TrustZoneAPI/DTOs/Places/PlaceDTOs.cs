@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using TrustZoneAPI.DTOs.AccessibilityFeatures;
 
 namespace TrustZoneAPI.DTOs.Places
 {
@@ -18,6 +19,19 @@ namespace TrustZoneAPI.DTOs.Places
         public decimal? Longitude { get; set; }
         public string? Details { get; set; }
         public List<int>? FeatureIds { get; set; }
+    }
+
+    public class PlaceBranchDTO
+    {
+        public int CategoryId { get; set; }
+
+        public decimal? Latitude { get; set; }
+
+        [Range(-180, 180)]
+        public decimal? Longitude { get; set; }
+
+        public string? Details { get; set; }
+        public List<AccessibilityFeatureDTO>? Features { get; set; }
     }
     public class PlaceDTO
     {

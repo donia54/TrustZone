@@ -10,4 +10,14 @@
         public DateTime RegistrationDate { get; set; }
         public bool IsActive { get; set; }
     }
+
+    public class UserLightDTO
+    {
+        public string Id { get; set; } = null!;
+
+        public string UserName { get; set; } = null!;
+
+        public string? ProfilePictureUrl { get; set; }
+    }
+
 }

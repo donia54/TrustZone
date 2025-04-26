@@ -36,6 +36,19 @@ namespace TrustZoneAPI.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
+        public async Task<bool> DeleteByBranchIdAndUserIdAsync(int branchId, string userId)
+        {
+            var favoritePlace = await _context.FavoritePlaces
+                .FirstOrDefaultAsync(fp => fp.BranchId == branchId && fp.UserId == userId);
+
+            if (favoritePlace == null)
+                return false;
+
+            _context.FavoritePlaces.Remove(favoritePlace);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> DeleteAsync(int id)
         {
             var favoritePlace = await _context.FavoritePlaces.FindAsync(id);

@@ -70,15 +70,25 @@ namespace TrustZoneAPI.Repositories
                 .ToListAsync();
         }
 
+     
+        public async Task<IEnumerable<Place>> FilterPlacesByFeaturesAsync(List<int> featureIds)
+        {
+            return await _context.Places
+                .AsNoTracking()
+                .Where(p => featureIds.All(fid => p.PlaceFeatures.Any(pf => pf.FeatureId == fid)))
+                .ToListAsync();
+        }
+
+
         public async Task<IEnumerable<Place>> GetPlacesWithFeatureAsync(int featureId)
         {
             return await _context.Places
                 .AsNoTracking()
                 .Where(p => p.PlaceFeatures.Any(pf => pf.FeatureId == featureId))
-                .Include(p => p.PlaceFeatures)
-                    .ThenInclude(pf => pf.Feature)
+
                 .ToListAsync();
         }
+
 
         public async Task<IEnumerable<Place>> SearchPlacesAsync(string query, int page, int pageSize)
         {
@@ -90,17 +100,7 @@ namespace TrustZoneAPI.Repositories
            .ToListAsync();
         }
 
-        public async Task<IEnumerable<Place>> FilterPlacesByFeaturesAsync(List<int> featureIds)
-        {
-            return await _context.Places
-                .AsNoTracking()
-                .Where(p => featureIds.All(fid => p.PlaceFeatures.Any(pf => pf.FeatureId == fid)))
-                .Include(p => p.Category)
-                .Include(p => p.PlaceFeatures)
-                    .ThenInclude(pf => pf.Feature)
-                .ToListAsync();
-        }
-
+  
         public async Task<Place?> GetPlaceWithBranchesByIdAsync(int placeId)
         {
             return await _context.Places

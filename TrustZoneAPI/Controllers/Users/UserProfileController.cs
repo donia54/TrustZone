@@ -45,7 +45,7 @@ namespace TrustZoneAPI.Controllers.Users
         }
 
 
-        [Authorize]
+       // [Authorize]
         [HttpGet("generateProfilePictureUploadSas")]
         public async Task<ActionResult> GenerateProfilePictureUploadSasUrl()
         {
@@ -54,7 +54,7 @@ namespace TrustZoneAPI.Controllers.Users
         }
 
 
-        [Authorize]
+       // [Authorize]
         [HttpGet("generateCoverPictureUploadSas")]
         public async Task<ActionResult> GenerateCoverPictureUploadSasUrl()
         {

@@ -53,5 +53,39 @@ namespace TrustZoneAPI.Controllers.Places
             return MapResponseToActionResult(result);
         }
 
+
+
+        [HttpGet("category/{categoryId}")]
+        public async Task<IActionResult> GetByCategory(int categoryId)
+        {
+            var result = await _branchService.GetBranchesByCategoryIdAsync(categoryId);
+            return MapResponseToActionResult(result);
+        }
+
+
+        [HttpGet("feature/{featureId}")]
+        public async Task<IActionResult> GetByFeature(int featureId)
+        {
+            var result = await _branchService.GetBranchesWithFeatureAsync(featureId);
+            return MapResponseToActionResult(result);
+        }
+
+        [HttpPost("filter")]
+        public async Task<ActionResult> FilterPlacesByFeaturesAsync([FromBody] List<int> featureIds)
+        {
+            var result = await _branchService.FilterBranchesByFeaturesAsync(featureIds);
+            return MapResponseToActionResult(result);
+        }
+
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return BadRequest("Search query cannot be empty.");
+
+            var result = await _branchService.SearchBranchesAsync(query, page, pageSize);
+            return Ok(result);
+        }
     }
 }

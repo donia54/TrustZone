@@ -46,19 +46,23 @@ namespace TrustZoneAPI.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-        public async Task<IEnumerable<Review>> GetReviewsByBranchAsync(int branchId)
+        public async Task<IEnumerable<Review>> GetReviewsByBranchAsync(int branchId, int pageNumber, int pageSize)
         {
             return await _context.Reviews
                 .Where(r => r.BranchId == branchId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
                 .Include(r => r.User)
                 .ToListAsync();
         }
+
 
         public async Task<IEnumerable<Review>> GetReviewsByUserAsync(string userId)
         {
             return await _context.Reviews
                 .Where(r => r.UserId == userId)
                 .Include(r => r.Branch)
+                .Include(r=>r.User)
                 .ToListAsync();
         }
 

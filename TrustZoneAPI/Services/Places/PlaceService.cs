@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using System.Collections.Generic;
+using TrustZoneAPI.DTOs.AccessibilityFeatures;
 using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
@@ -19,6 +20,7 @@ namespace TrustZoneAPI.Services.Places
         Task<ResponseResult<IEnumerable<PlaceDTO>>> FilterPlacesByFeaturesAsync(List<int> featureIds);
         Task<ResponseResult<PlaceWithBranchesDto?>> GetPlaceWithBranchesByIdAsync(int placeId);
 
+        Task<ResponseResult<PlaceBranchDTO>> GetPlaceBranchByIdAsync(int id); // to deal with branch as a place 
         Task<IEnumerable<PlaceSearchDTO>> SearchPlacesAsync(string query, int page, int pageSize);
     }
     public class PlaceService : IPlaceService
@@ -26,12 +28,14 @@ namespace TrustZoneAPI.Services.Places
         private readonly IPlaceRepository _placeRepository;
         private readonly IHubContext<SearchHub> _searchHub;
         private readonly ICategoryRepository _categoryRepository;
+        private readonly IPlaceFeatureService _placeFeatureService;
 
-        public PlaceService(IPlaceRepository placeRepository, IHubContext<SearchHub> searchHub, ICategoryRepository categoryRepository)
+        public PlaceService(IPlaceRepository placeRepository, IHubContext<SearchHub> searchHub, ICategoryRepository categoryRepository, IPlaceFeatureService placeFeatureService)
         {
             _placeRepository = placeRepository;
             _searchHub = searchHub;
             _categoryRepository = categoryRepository;
+            _placeFeatureService = placeFeatureService;
         }
 
         public async Task<ResponseResult<IEnumerable<PlaceDTO>>> GetAllAsync()
@@ -41,19 +45,54 @@ namespace TrustZoneAPI.Services.Places
             if (!places.Any())
                 return ResponseResult<IEnumerable<PlaceDTO>>.NotFound("No places found");
 
-            var placeDtos = places.Select(_ConvertEntityToDTO);
+            var placeDtos = new List<PlaceDTO>();
+
+            foreach (var place in places)
+            {
+                var dto = _ConvertEntityToDTO(place);
+
+                var featuresResult = await _placeFeatureService.GetFeaturesByPlaceIdAsync(place.Id);
+                if (featuresResult.IsSuccess && featuresResult.Data is not null)
+                {
+                    dto.FeatureIds = featuresResult.Data.Select(f => f.FeatureId).ToList();
+                }
+
+                placeDtos.Add(dto);
+            }
 
             return ResponseResult<IEnumerable<PlaceDTO>>.Success(placeDtos);
         }
 
 
+        public async Task<ResponseResult<PlaceBranchDTO>> GetPlaceBranchByIdAsync(int id)
+        {
+            var place = await _placeRepository.GetByIdAsync(id);
+            if (place == null)
+                return ResponseResult<PlaceBranchDTO>.NotFound("Place not found.");
+            PlaceBranchDTO dto = _ConvertEntityToDTO(place,"for branch");
+
+            var featuresResult = await _placeFeatureService.GetFeaturesByPlaceIdAsync(id);
+            if (featuresResult.IsSuccess && featuresResult.Data is not null)
+            {
+                dto.Features = featuresResult.Data.ToList();
+            }
+
+            return ResponseResult<PlaceBranchDTO>.Success(dto);
+        }
         public async Task<ResponseResult<PlaceDTO>> GetByIdAsync(int id)
         {
             var place = await _placeRepository.GetByIdAsync(id);
             if (place == null)
                 return ResponseResult<PlaceDTO>.NotFound("Place not found.");
+            var dto = _ConvertEntityToDTO(place);
 
-            return ResponseResult<PlaceDTO>.Success(_ConvertEntityToDTO(place));
+            var featuresResult = await _placeFeatureService.GetFeaturesByPlaceIdAsync(id);
+            if (featuresResult.IsSuccess && featuresResult.Data is not null)
+            {
+                dto.FeatureIds = featuresResult.Data.Select(f => f.FeatureId).ToList();
+            }
+
+            return ResponseResult<PlaceDTO>.Success(dto);
         }
 
 
@@ -68,7 +107,22 @@ namespace TrustZoneAPI.Services.Places
             var place = _ConvertDTOToEntity(placeDto);
 
             bool result = await _placeRepository.AddAsync(place);
-            return result ? ResponseResult.Created() : ResponseResult.Error("Failed to add place", 500);
+            if (!result)
+                return ResponseResult.Error("Failed to add place", 500);
+
+            if (placeDto.FeatureIds is not null && placeDto.FeatureIds.Any())
+            {
+                var featureResult = await _placeFeatureService.AddFeatureListToPlaceAsync(new AddFeatureListToPlaceDTO
+                {
+                    PlaceId = place.Id, 
+                    FeatureIds = placeDto.FeatureIds
+                });
+
+                if (!featureResult.IsSuccess)
+                    return ResponseResult.Error($"Place added but failed to assign some features: {featureResult.ErrorMessage}", featureResult.StatusCode);
+            }
+
+            return ResponseResult.Created();
         }
 
 
@@ -162,6 +216,17 @@ namespace TrustZoneAPI.Services.Places
         }
 
 
+
+        private PlaceBranchDTO _ConvertEntityToDTO(Place place,string s)
+        {
+            return new PlaceBranchDTO
+            { 
+                CategoryId = place.CategoryId,
+                Latitude = place.Latitude,
+                Longitude = place.Longitude,
+                Details = place.Details
+            };
+        }
         private PlaceDTO _ConvertEntityToDTO(Place place)
         {
            return new PlaceDTO

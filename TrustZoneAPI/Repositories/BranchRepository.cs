@@ -46,13 +46,43 @@ namespace TrustZoneAPI.Repositories
             return await _context.SaveChangesAsync() > 0;
         }
 
-
-        #region We used GetPlaceWithBranchesByIdAsync in place repo instead.
-        /*public async Task<IEnumerable<Branch>> GetBranchesByPlaceIdAsync(int placeId)
+        public async Task<IEnumerable<Branch>> GetBranchesByCategoryIdAsync(int categoryId)
         {
-            return await _context.Branches.Where(b => b.PlaceId == placeId).ToListAsync();
-        }*/
-        #endregion
+            return await  _context.Branches
+                      .AsNoTracking()
+                      .Where(b => b.Place.CategoryId == categoryId)
+                     .ToListAsync();
+        }
+
+
+        public async Task<IEnumerable<Branch>> FilterBranchesByPlaceFeaturesAsync(List<int> featureIds)
+        {
+            return await _context.Branches
+                .AsNoTracking()
+                .Where(b => featureIds.All(fid => b.Place.PlaceFeatures.Any(pf => pf.FeatureId == fid)))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Branch>> GetBranchesWithFeatureAsync(int featureId)
+        {
+            return await _context.Branches
+                .AsNoTracking()
+                .Where(b => b.Place.PlaceFeatures.Any(pf => pf.FeatureId == featureId))
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Branch>> SearchBranchesAsync(string query, int page, int pageSize)
+        {
+            return await _context.Branches
+                .AsNoTracking()
+                .Where(b => b.Place.Name.Contains(query) || b.Place.Category.Name.Contains(query) || b.Place.Details.Contains(query))
+                .OrderBy(b => b.Place.Name)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+        }
+
+
 
     }
 }

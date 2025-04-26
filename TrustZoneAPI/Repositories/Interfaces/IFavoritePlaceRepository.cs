@@ -6,5 +6,7 @@ namespace TrustZoneAPI.Repositories.Interfaces
     {
         Task<IEnumerable<FavoritePlace>> GetFavoritePlacesByUserAsync(string userId);
         Task<bool> IsBranchFavoritedByUserAsync(string userId, int branchId);
+
+        Task<bool> DeleteByBranchIdAndUserIdAsync(int branchId, string userId);
     }
 }

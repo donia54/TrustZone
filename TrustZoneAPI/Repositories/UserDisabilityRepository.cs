@@ -20,19 +20,28 @@ namespace TrustZoneAPI.Repositories
            return  await _context.SaveChangesAsync() > 0;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async  Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var entity = await  _context.UserDisabilities.FindAsync(id);
+            if (entity == null)
+                return false;
+
+            _context.UserDisabilities.Remove(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public Task<IEnumerable<UserDisability>> GetAllAsync()
+        public async Task<IEnumerable<UserDisability>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.UserDisabilities
+                .Include(ud => ud.DisabilityType)
+                .ToListAsync();
         }
 
-        public Task<UserDisability?> GetByIdAsync(int id)
+        public async Task<UserDisability?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.UserDisabilities
+                .Include(ud => ud.DisabilityType)
+                .FirstOrDefaultAsync(ud => ud.Id == id);
         }
 
         public async Task<List<DisabilityType>> GetUserDisabilitiesByUserIdAsync(string userId)
@@ -55,9 +64,17 @@ namespace TrustZoneAPI.Repositories
             await _context.SaveChangesAsync();
         }
 
-        public Task<bool> UpdateAsync(UserDisability entity)
+        public async Task<bool> UpdateAsync(UserDisability entity)
         {
-            throw new NotImplementedException();
+            var existingEntity = await _context.UserDisabilities.FindAsync(entity.Id);
+            if (existingEntity == null)
+                return false;
+
+            existingEntity.UserId = entity.UserId;
+            existingEntity.DisabilityTypeId = entity.DisabilityTypeId;
+
+            _context.UserDisabilities.Update(existingEntity);
+            return await _context.SaveChangesAsync() > 0;
         }
     }
 }

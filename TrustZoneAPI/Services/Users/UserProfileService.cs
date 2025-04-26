@@ -118,12 +118,16 @@ namespace TrustZoneAPI.Services.Users
             return ResponseResult<UserProfileDTO>.Success(dto);
         }
 
+
+
+
+
         private async Task<ResponseResult<string>> _GenerateUploadPictureSasUrlAsync(string type)
         {
             var fileName = $"{Guid.NewGuid()}";
 
 
-            var sasUrl = await _blobService.GenerateUploadSasUrlAsync(fileName);
+            var sasUrl = await _blobService.GenerateUploadSasUrlAsync("profile-pictures", fileName);
 
             return sasUrl != null
                 ? ResponseResult<string>.Success(sasUrl)
@@ -155,7 +159,7 @@ namespace TrustZoneAPI.Services.Users
             if (string.IsNullOrEmpty(fileName))
                 return ResponseResult<string>.NotFound($"No {type} picture found");
 
-            var sasUrl = await _blobService.GeneratePictureLoadSasUrlAsync(fileName);
+            var sasUrl = await _blobService.GeneratePictureLoadSasUrlAsync("profile-pictures", fileName);
             return ResponseResult<string>.Success(sasUrl);
         }
 
@@ -179,8 +183,6 @@ namespace TrustZoneAPI.Services.Users
             var disabilityTypeIds = disabilityTypes.Select(d => d.Id).ToList();
             await _userdisability.SetUserDisabilityTypesAsync(userId, disabilityTypeIds);
         }
-
-
 
         private async Task<UserProfileDTO> _MapToDTO(User user)
         {

@@ -7,6 +7,7 @@ using TrustZoneAPI.Services.Places;
 namespace TrustZoneAPI.Controllers.Places
 {
     [Route("api/[controller]")]
+   [ApiExplorerSettings(IgnoreApi = true)]
     [ApiController]
     public class PlaceController : BaseController
     {
@@ -66,7 +67,7 @@ namespace TrustZoneAPI.Controllers.Places
         }
 
 
-        [ApiExplorerSettings(IgnoreApi = true)]
+        //[ApiExplorerSettings(IgnoreApi = true)]
         [HttpGet("feature/{featureId}")]
         public async Task<IActionResult> GetByFeature(int featureId)
         {
@@ -74,7 +75,7 @@ namespace TrustZoneAPI.Controllers.Places
             return MapResponseToActionResult(result);
         }
 
-        [ApiExplorerSettings(IgnoreApi = true)]
+       // [ApiExplorerSettings(IgnoreApi = true)]
         [HttpPost("filter")]
         public async Task<ActionResult> FilterPlacesByFeaturesAsync([FromBody] List<int> featureIds)
         {

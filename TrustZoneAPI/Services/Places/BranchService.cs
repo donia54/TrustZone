@@ -1,6 +1,9 @@
-﻿using TrustZoneAPI.DTOs.Places;
+﻿using Microsoft.AspNetCore.SignalR;
+using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.Models;
+using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Categories;
 using static TrustZoneAPI.DTOs.Places.ReviewsDTOs;
 
 namespace TrustZoneAPI.Services.Places
@@ -13,17 +16,30 @@ namespace TrustZoneAPI.Services.Places
         Task<ResponseResult<BranchDTO>> AddAsync(CreateBranchDTO createDto);
         Task<ResponseResult> UpdateAsync(int id, UpdateBranchDTO updateDto);
         Task<ResponseResult> DeleteAsync(int id);
-       // Task<ResponseResult<IEnumerable<BranchDTO>>> GetBranchesByPlaceAsync(int placeId);
+
+        Task<ResponseResult<IEnumerable<BranchDTO>>> GetBranchesByCategoryIdAsync(int categoryId);
+        Task<ResponseResult<IEnumerable<BranchLightDTO>>> FilterBranchesByFeaturesAsync(List<int> featureIds);
+        Task<IEnumerable<BranchLightDTO>> SearchBranchesAsync(string query, int page, int pageSize);
+        Task<ResponseResult<IEnumerable<BranchLightDTO>>> GetBranchesWithFeatureAsync(int featureId);
+
+
     }
 
 public class BranchService : IBranchService
     {
 
         private readonly IBranchRepository _branchRepository;
+        private readonly IPlaceService _placeService;
+        public readonly ICategoryService _categoryservice;
+        private readonly IHubContext<SearchHub> _searchHub;
 
-        public BranchService(IBranchRepository branchRepository)
+
+        public BranchService(IBranchRepository branchRepository, IPlaceService placeService, ICategoryService categoryService, IHubContext<SearchHub> searchHub)
         {
             _branchRepository = branchRepository;
+            _placeService = placeService;
+            _categoryservice = categoryService;
+            _searchHub = searchHub;
         }
 
         public async Task<ResponseResult<IEnumerable<BranchDTO>>> GetAllAsync()
@@ -82,13 +98,71 @@ public class BranchService : IBranchService
             return result ? ResponseResult.Success() : ResponseResult.NotFound("Branch not found");
         }
 
-
-        private static BranchDTO _ConvertToDTO(Branch branch)
+        public async Task<ResponseResult<IEnumerable<BranchDTO>>> GetBranchesByCategoryIdAsync(int categoryId)
         {
+            var categoryExists = await  _categoryservice.IsCategoryExistsByIdAsync(categoryId);
+            if (categoryExists==null)
+                return ResponseResult<IEnumerable<BranchDTO>>.Error("Invalid category ID.", 400);
+
+            var branches = await _branchRepository.GetBranchesByCategoryIdAsync(categoryId);
+
+            var branchesDtos = branches.Select(_ConvertToDTO).ToList();
+
+            if (!branchesDtos.Any())
+                return ResponseResult<IEnumerable<BranchDTO>>.NotFound("No branches found for this category.");
+
+            return ResponseResult<IEnumerable<BranchDTO>>.Success(branchesDtos);
+        }
+
+
+        public async Task<ResponseResult<IEnumerable<BranchLightDTO>>> GetBranchesWithFeatureAsync(int featureId)
+        {
+            var branches = await _branchRepository.GetBranchesWithFeatureAsync(featureId);
+            var branchesDtos = branches.Select(_ConvertToLightDTO).ToList();
+
+            return ResponseResult<IEnumerable<BranchLightDTO>>.Success(branchesDtos);
+        }
+
+        public async Task<IEnumerable<BranchLightDTO>> SearchBranchesAsync(string query, int page, int pageSize)
+        {
+            var branches = await _branchRepository.SearchBranchesAsync(query, page, pageSize);
+
+            var results = branches.Select(_ConvertToLightDTO).ToList();
+            if (!results.Any())
+                return Enumerable.Empty<BranchLightDTO>();
+
+            await _searchHub.Clients.All.SendAsync("ReceiveSearchResults", results);
+
+            return results;
+        }
+
+        public async Task<ResponseResult<IEnumerable<BranchLightDTO>>> FilterBranchesByFeaturesAsync(List<int> featureIds)
+        {
+            var branches = await _branchRepository.FilterBranchesByPlaceFeaturesAsync(featureIds);
+            var branchesDtos = branches.Select(_ConvertToLightDTO);
+
+            return ResponseResult<IEnumerable<BranchLightDTO>>.Success(branchesDtos);
+        }
+
+
+        private BranchLightDTO _ConvertToLightDTO(Branch branch)
+        {
+            return new BranchLightDTO
+            {
+                Id = branch.Id,
+                Address = branch.Address,
+
+            };
+        }
+
+        private  BranchDTO _ConvertToDTO(Branch branch)
+        {
+            var placeDto = _placeService.GetPlaceBranchByIdAsync(branch.PlaceId).Result.Data!;
             return new BranchDTO
             {
                 Id = branch.Id,
-                PlaceId = branch.PlaceId,
+             
+                // PlaceId = branch.PlaceId,
                 Address = branch.Address,
                 Website = branch.Website,
                 Phone = branch.Phone,
@@ -103,8 +177,9 @@ public class BranchService : IBranchService
                     ClosingTime = hour.ClosingTime
 
                 }).ToList(),
+                Place = placeDto,
 
-   
+
             };
         }
 
@@ -126,5 +201,7 @@ public class BranchService : IBranchService
             branch.Website = dto.Website;
             branch.Phone = dto.Phone;
         }
+
+        
     }
 }

@@ -13,31 +13,42 @@ namespace TrustZoneAPI.Repositories
         {
             _context = context;
         }
-        public Task<bool> AddAsync(DisabilityType entity)
+        public async Task<bool> AddAsync(DisabilityType entity)
         {
-            throw new NotImplementedException();
+            await _context.DisabilityTypes.AddAsync(entity);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
-            throw new NotImplementedException();
+            var disabilityType = await _context.DisabilityTypes.FindAsync(id);
+            if (disabilityType == null)
+                return false;
+
+            _context.DisabilityTypes.Remove(disabilityType);
+            return await _context.SaveChangesAsync() > 0;
         }
 
-        public Task<IEnumerable<DisabilityType>> GetAllAsync()
+        public async Task<IEnumerable<DisabilityType>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.DisabilityTypes.ToListAsync();
+        }
+        public async Task<DisabilityType?> GetByIdAsync(int id)
+        {
+            return await _context.DisabilityTypes.FindAsync(id);
         }
 
-        public Task<DisabilityType?> GetByIdAsync(int id)
+        public async Task<bool> UpdateAsync(DisabilityType entity)
         {
-            throw new NotImplementedException();
-        }
+            var existing = await _context.DisabilityTypes.FindAsync(entity.Id);
+            if (existing == null)
+                return false;
 
-    
+            existing.Name = entity.Name;
 
-        public Task<bool> UpdateAsync(DisabilityType entity)
-        {
-            throw new NotImplementedException();
+
+            _context.DisabilityTypes.Update(existing);
+            return await _context.SaveChangesAsync() > 0;
         }
 
 
