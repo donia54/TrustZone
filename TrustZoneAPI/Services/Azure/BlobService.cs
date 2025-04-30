@@ -9,6 +9,8 @@ namespace TrustZoneAPI.Services.Azure
     public interface IBlobService
     {
         string ExtractBlobName(string url);
+        Task<bool> FileExistsAsync(string containerName, string fileName);
+
         Task<string> GenerateUploadSasUrlAsync(string containerName, string fileName);
         Task<string> GeneratePictureLoadSasUrlAsync(string containerName, string blobPath);
     }
@@ -102,7 +104,15 @@ namespace TrustZoneAPI.Services.Azure
         }
 
 
-       public string ExtractBlobName(string url)
+        public async Task<bool> FileExistsAsync(string containerName, string fileName)
+        {
+            var containerClient = GetContainerClient(containerName);
+            var blobClient = containerClient.GetBlobClient(fileName);
+            return await blobClient.ExistsAsync();
+        }
+
+
+        public string ExtractBlobName(string url)
         {
             try
             {

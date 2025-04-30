@@ -1,10 +1,12 @@
 ﻿using Humanizer;
+using System.Threading.Tasks;
 using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Azure;
+using TrustZoneAPI.Services.Users;
 using static TrustZoneAPI.DTOs.Places.ReviewsDTOs;
 
 namespace TrustZoneAPI.Services.Places
@@ -25,12 +27,13 @@ namespace TrustZoneAPI.Services.Places
     public class ReviewService : IReviewService
     {
         private readonly IReviewRepository _reviewRepository;
-        private readonly IBlobService _blobService; 
-
-        public ReviewService (IReviewRepository reviewRepository,IBlobService blobService)
+        private readonly IBlobService _blobService;
+        private readonly IUserProfileService _userService;
+        public ReviewService (IReviewRepository reviewRepository,IBlobService blobService,IUserProfileService userProfileService)
         {
             _reviewRepository = reviewRepository;
             _blobService = blobService;
+            _userService = userProfileService;
         }
 
 
@@ -76,7 +79,7 @@ namespace TrustZoneAPI.Services.Places
             {
                 var dto =  _MapToDto(review);
 
-                result.Add(dto);
+                result.Add(await dto);
             }
 
             return ResponseResult<IEnumerable<ReviewDto>>.Success(result);
@@ -85,14 +88,15 @@ namespace TrustZoneAPI.Services.Places
         public async Task<ResponseResult<IEnumerable<ReviewDto>>> GetReviewsByUserAsync(string userId)
         {
             var reviews = await _reviewRepository.GetReviewsByUserAsync(userId);
-            var result = reviews.Select(_MapToDto);
+            var mappedTasks = reviews.Select(_MapToDto); 
+            var result = await Task.WhenAll(mappedTasks); 
             return ResponseResult<IEnumerable<ReviewDto>>.Success(result);
         }
         public async Task<ResponseResult<IEnumerable<ReviewDto>>> GetVerifiedReviewsAsync()
         {
             var reviews = await _reviewRepository.GetVerifiedReviewsAsync();
             var result = reviews.Select(_MapToDto);
-            return ResponseResult<IEnumerable<ReviewDto>>.Success(result);
+            return ResponseResult<IEnumerable<ReviewDto>>.Success((IEnumerable<ReviewDto>)result);
         }
 
         public async Task<ResponseResult<ReviewDto>> VerifyReviewAsync(int id)
@@ -101,7 +105,7 @@ namespace TrustZoneAPI.Services.Places
             if (review == null)
                 return ResponseResult<ReviewDto>.NotFound("Review not found");
 
-            return ResponseResult<ReviewDto>.Success(_MapToDto(review));
+            return ResponseResult<ReviewDto>.Success(await _MapToDto(review));
         }
 
 
@@ -135,7 +139,7 @@ namespace TrustZoneAPI.Services.Places
 
 
 
-        private ReviewDto _MapToDto(Review review)
+        private async Task<ReviewDto> _MapToDto(Review review)
         {
             return new ReviewDto
             {
@@ -143,8 +147,8 @@ namespace TrustZoneAPI.Services.Places
                 user = new UserLightDTO
                 {
                     Id = review.User.Id,
-                    UserName = review.User.UserName,
-                    ProfilePictureUrl = review.User.ProfilePicture,
+                    UserName = review.User.UserName!,
+                    ProfilePictureUrl =await  _userService.GetPictureUrlAsync(review.User.Id, "profile"),
                 },
                 BranchId = review.BranchId,
                 Rating = review.Rating,

@@ -17,6 +17,7 @@ namespace TrustZoneAPI.Services.Users
         Task<ResponseResult> UpdateProfilePictureAsync(string userId, string fileName);
         Task<ResponseResult<string>> GetProfilePictureUrlAsync(string userId);
 
+        Task<string> GetPictureUrlAsync(string userId, string type);//or other classes 
         // Cover Picture Operations
         Task<ResponseResult<string>> GenerateCoverPictureUploadSasUrlAsync();
         Task<ResponseResult> UpdateCoverPictureAsync(string userId, string fileName);
@@ -106,12 +107,14 @@ namespace TrustZoneAPI.Services.Users
                 return ResponseResult<UserProfileDTO>.NotFound("User not found");
 
             var profilePictureUrl = string.IsNullOrEmpty(user.ProfilePicture) ? null
-                : await GenerateProfilePictureUploadSasUrlAsync();
+                : await GetPictureUrlAsync(userId, "profile");
 
             var coverPictureUrl = string.IsNullOrEmpty(user.CoverPicture) ? null
-                : await GenerateProfilePictureUploadSasUrlAsync();   //to minimize the number of frontend calls.
+                : await GetPictureUrlAsync(userId, "cover");   //to minimize the number of frontend calls.
 
             var dto = await _MapToDTO(user);
+            dto.CoverPictureUrl = coverPictureUrl;
+            dto.ProfilePictureUrl = profilePictureUrl;
 
 
 
@@ -140,6 +143,17 @@ namespace TrustZoneAPI.Services.Users
             if (user == null)
                 return ResponseResult.NotFound("User not found");
 
+
+
+            if (!Guid.TryParse(fileName, out var parsedGuid) || parsedGuid == Guid.Empty)
+                return ResponseResult.Error("Invalid file name. Must be a valid GUID.",400);
+
+
+            var exists = await _blobService.FileExistsAsync("profile-pictures", fileName);
+            if (!exists)
+                return ResponseResult.Error("The specified file does not exist in blob storage.", 400);
+
+
             if (type == "profile")
                 user.ProfilePicture = fileName;
             else if (type == "cover")
@@ -149,6 +163,19 @@ namespace TrustZoneAPI.Services.Users
             return ResponseResult.Success();
         }
 
+        public  async Task<string> GetPictureUrlAsync(string userId, string type)
+        {
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                return "";
+
+            var fileName = type == "profile" ? user.ProfilePicture : user.CoverPicture;
+            if (string.IsNullOrEmpty(fileName))
+                return "";
+            var sasUrl = await _blobService.GeneratePictureLoadSasUrlAsync("profile-pictures", fileName);
+            return sasUrl;
+        }
         private async Task<ResponseResult<string>> _GetPictureUrlAsync(string userId, string type)
         {
             var user = await _userRepository.GetByIdAsync(userId);
@@ -188,11 +215,9 @@ namespace TrustZoneAPI.Services.Users
             return new UserProfileDTO
             {
                 Id = user.Id,
-                UserName = user.UserName,
-                Email = user.Email,
+                UserName = user.UserName!,
+                Email = user.Email!,
                 Age = user.Age,
-                ProfilePictureUrl = user.ProfilePicture,
-                CoverPictureUrl = user.CoverPicture,
                 RegistrationDate = user.RegistrationDate,
                 IsActive = user.IsActive,
                 DisabilityTypes = disabilityTypes

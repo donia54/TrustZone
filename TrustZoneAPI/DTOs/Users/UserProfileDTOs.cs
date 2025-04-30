@@ -28,10 +28,10 @@ namespace TrustZoneAPI.DTOs.Users
         public string Id { get; set; } = null!;
 
         [Display(Name = "Username")]
-        public string UserName { get; set; } = null!;
+        public string UserName { get; set; } = string.Empty;
 
         [Display(Name = "Email")]
-        public string Email { get; set; } = null!;
+        public string Email { get; set; } = string.Empty;
 
         [Display(Name = "Age")]
         public int Age { get; set; }
