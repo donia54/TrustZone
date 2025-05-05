@@ -2,10 +2,9 @@
 using TrustZoneAPI.DTOs.Users;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
-using TrustZoneAPI.Services.Conversations;
 using TrustZoneAPI.Services.Users;
 
-namespace TrustZoneAPI.Services.Messages;
+namespace TrustZoneAPI.Services.Chat;
 
 // Note: I need to organize UserId and CurrentUserId between UserSerivce and BaseController (When I reach there) Incha'Allah.
 public interface IMessageService
@@ -127,7 +126,7 @@ public class MessageService : IMessageService
             SentAt = message.SentAt,
             IsRead = message.IsRead,
             ReadAt = message.ReadAt,
-            Sender = ((message.Sender != null)  && (message.Sender.UserName != null)) ? new UserBasicDTO
+            Sender = message.Sender != null  && message.Sender.UserName != null ? new UserBasicDTO
 
             {
                 Id = message.Sender.Id,

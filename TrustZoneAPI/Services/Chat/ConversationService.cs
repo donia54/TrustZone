@@ -4,7 +4,7 @@ using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Services.Users;
 
-namespace TrustZoneAPI.Services.Conversations;
+namespace TrustZoneAPI.Services.Chat;
 public interface IConversationService
 {
     Task<ResponseResult<ConversationDTO>> GetByIdAsync(int id);
