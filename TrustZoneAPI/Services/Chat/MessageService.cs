@@ -1,5 +1,7 @@
-﻿using TrustZoneAPI.DTOs.Chat;
+﻿using Microsoft.AspNetCore.SignalR;
+using TrustZoneAPI.DTOs.Chat;
 using TrustZoneAPI.DTOs.Users;
+using TrustZoneAPI.Hubs;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Services.Users;
@@ -22,12 +24,14 @@ public class MessageService : IMessageService
     private readonly ITMessageRepository _repository;
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
+    private readonly IHubContext<ChatHub> _hubContext;
     public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
-        ,IUserService userService)
+        ,IUserService userService, IHubContext<ChatHub> hubContext)
     {
         _repository = messageRepository;
         _conversationService = conversationService;
         _userService = userService;
+        _hubContext = hubContext;
     }
 
     public async Task<ResponseResult<MessageDTO>> GetByIdAsync(int id)
@@ -80,9 +84,21 @@ public class MessageService : IMessageService
         };
 
         var success = await _repository.AddAsync(message);
-        return success 
-            ? ResponseResult.Created() 
-            : ResponseResult.Error("Failed to create message.", 500);
+
+        if(success)
+        {
+            var receiverId = dto.User2Id; // المستخدم الآخر في المحادثة
+            await _hubContext.Clients.User(receiverId)
+                .SendAsync("ReceiveMessage", message.SenderId, message.Content);
+
+            return ResponseResult.Created();
+        }
+        else
+        {
+            return ResponseResult.Error("Failed to create message.", 500);
+        }
+
+
     }
 
     public async Task<ResponseResult> UpdateAsync(int id, UpdateMessageDTO dto)

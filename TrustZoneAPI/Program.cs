@@ -18,6 +18,7 @@ using TrustZoneAPI.Services.Disabilities;
 using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Chat;
+using TrustZoneAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -79,8 +80,15 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
-builder.Services.AddSignalR();
 
+builder.Services.AddScoped<IPlaceFeatureService, PlaceFeatureService>();
+builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
+builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
+builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
+builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
+
+
+builder.Services.AddSignalR();
 
 // For CurrenUserId
 builder.Services.AddHttpContextAccessor();
@@ -180,4 +188,7 @@ app.UseAuthorization();
 app.MapControllers();
 //app.MapRazorPages();
 app.MapHub<SearchHub>("/searchHub");
+
+app.MapHub<ChatHub>("/chatHub");
+
 app.Run();
