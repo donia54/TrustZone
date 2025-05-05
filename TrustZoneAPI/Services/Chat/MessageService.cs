@@ -24,9 +24,9 @@ public class MessageService : IMessageService
     private readonly ITMessageRepository _repository;
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
-    private readonly IHubContext<ChatHub> _hubContext;
+    private readonly ChatHub _hubContext;
     public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
-        ,IUserService userService, IHubContext<ChatHub> hubContext)
+        ,IUserService userService, ChatHub hubContext)
     {
         _repository = messageRepository;
         _conversationService = conversationService;
@@ -99,8 +99,7 @@ public class MessageService : IMessageService
         if(success)
         {
             var receiverId = dto.User2Id; // المستخدم الآخر في المحادثة
-            await _hubContext.Clients.User(receiverId)
-                .SendAsync("ReceiveMessage", message.SenderId, message.Content);
+            await _hubContext.SendMessage(receiverId, currentUserId, dto.Content);
 
             return ResponseResult.Created();
         }

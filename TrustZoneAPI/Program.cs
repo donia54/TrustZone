@@ -88,6 +88,8 @@ builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
 builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
 
 
+builder.Services.AddScoped<ChatHub>();
+
 builder.Services.AddSignalR();
 
 // For CurrenUserId
@@ -158,11 +160,14 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("*")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
+
+
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 
 var app = builder.Build();
