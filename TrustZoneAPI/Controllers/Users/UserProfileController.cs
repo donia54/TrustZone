@@ -25,6 +25,13 @@ namespace TrustZoneAPI.Controllers.Users
             var response = await _userProfileService.GetUserProfileAsync(CurrentUserId);
             return MapResponseToActionResult(response);
         }
+        [Authorize]
+        [HttpGet("{userId}")]
+        public async Task<ActionResult> GetUserProfileByUserId(string userId)
+        {
+            var response = await _userProfileService.GetUserProfileAsync(userId);
+            return MapResponseToActionResult(response);
+        }
 
 
         [Authorize]

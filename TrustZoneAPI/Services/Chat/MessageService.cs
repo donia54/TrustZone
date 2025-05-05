@@ -59,13 +59,24 @@ public class MessageService : IMessageService
     public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto)
     {
         // Note ye Donia: ConversationId preffered to be Guid or string as Guid.ToString(), not int.
+
+        var currentUserId = _userService.GetCurrentUserId(); // I think this is not the best way.
+
+
         int currentConversationId = dto.ConversationId;
         if (currentConversationId == 0)
         {
-           var result = await _conversationService.CreateAsync(dto.User2Id);
-            if(!result.IsSuccess)
-                return ResponseResult.Error($"{result.ErrorMessage}", result.StatusCode);
-            currentConversationId = result.Data;
+            var conversation = await _conversationService.GetConversationBetweenUsersAsync(currentUserId, dto.User2Id);
+           
+            if(conversation.Data != null)
+            currentConversationId = conversation.Data.Id;
+            if (currentConversationId == 0)
+            {
+                var result = await _conversationService.CreateAsync(dto.User2Id);
+                if (!result.IsSuccess)
+                    return ResponseResult.Error($"{result.ErrorMessage}", result.StatusCode);
+                currentConversationId = result.Data;
+            }
         }
         //var IsConversationExists = await _conversationService.IsConversationExists(currentConversationId);
         //if (!IsConversationExists)
@@ -77,8 +88,8 @@ public class MessageService : IMessageService
 
         var message = new TMessage
         {
-            ConversationId = dto.ConversationId,
-            SenderId = _userService.GetCurrentUserId(), // I think this is not the best way.
+            ConversationId = currentConversationId,
+            SenderId = currentUserId,
             Content = dto.Content,
             IsRead = false
         };
