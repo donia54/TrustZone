@@ -221,6 +221,7 @@ namespace TrustZoneAPI.Services.Places
         {
             return new PlaceBranchDTO
             { 
+                Name= place.Name,
                 CategoryId = place.CategoryId,
                 Latitude = place.Latitude,
                 Longitude = place.Longitude,

@@ -194,6 +194,12 @@ namespace TrustZoneAPI.Services.Users
         private async Task<List<DisabilityTypeDTO>> _GetUserDisabilityTypesAsync(string userId)
         {
             var types = await _userdisability.GetUserDisabilitiesByUserIdAsync(userId);
+
+            if (types.Data == null || !types.Data.Any())
+            {
+                await _userdisability.AddAsync(new UserDisabilityCreateDTO { DisabilityTypeId=2,UserId=userId});
+                types = await _userdisability.GetUserDisabilitiesByUserIdAsync(userId);
+            }
             var disabilityTypeDTOs = types.Data.Select(t => new DisabilityTypeDTO
             {
                 Id = t.Id,

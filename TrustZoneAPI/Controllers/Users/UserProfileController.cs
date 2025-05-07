@@ -12,7 +12,7 @@ namespace TrustZoneAPI.Controllers.Users
     {
 
         private readonly IUserProfileService _userProfileService;
-        
+
         public UserProfileController(IUserProfileService userProfileService)
         {
             _userProfileService = userProfileService;
@@ -23,6 +23,14 @@ namespace TrustZoneAPI.Controllers.Users
         public async Task<ActionResult> GetUserProfile()
         {
             var response = await _userProfileService.GetUserProfileAsync(CurrentUserId);
+            return MapResponseToActionResult(response);
+        }
+
+        [Authorize]
+        [HttpGet("{userId}")]
+        public async Task<ActionResult> GetUserProfile(string userId)
+        {
+            var response = await _userProfileService.GetUserProfileAsync(userId);
             return MapResponseToActionResult(response);
         }
 

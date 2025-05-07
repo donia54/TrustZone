@@ -29,16 +29,24 @@ namespace TrustZoneAPI.Services.Places
         private readonly IReviewRepository _reviewRepository;
         private readonly IBlobService _blobService;
         private readonly IUserProfileService _userService;
-        public ReviewService (IReviewRepository reviewRepository,IBlobService blobService,IUserProfileService userProfileService)
+        private readonly IBranchService _branchService;
+        public ReviewService (IReviewRepository reviewRepository,IBlobService blobService,IUserProfileService userProfileService, IBranchService branchService)
         {
             _reviewRepository = reviewRepository;
             _blobService = blobService;
             _userService = userProfileService;
+            _branchService = branchService;
         }
 
 
         public async Task<ResponseResult<bool>> CreateReviewAsync(string userid,CreateReviewDto dto)
         {
+            var branchExist= await _branchService.GetByIdAsync(dto.BranchId);
+            if (!branchExist.IsSuccess || branchExist.Data == null)
+            {
+                return ResponseResult<bool>.Error("Branch not found", 404);
+            }
+
             var review = _MapToReview(userid,dto);
 
             var success = await _reviewRepository.AddAsync(review);

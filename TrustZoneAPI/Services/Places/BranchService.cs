@@ -151,6 +151,7 @@ public class BranchService : IBranchService
             {
                 Id = branch.Id,
                 Address = branch.Address,
+                PlaceName = branch.Place?.Name ?? string.Empty
 
             };
         }

@@ -23,6 +23,7 @@ namespace TrustZoneAPI.DTOs.Places
 
     public class PlaceBranchDTO
     {
+        public string Name { get; set; } = null!;
         public int CategoryId { get; set; }
 
         public decimal? Latitude { get; set; }

@@ -5,7 +5,9 @@ namespace TrustZoneAPI.DTOs.Places
 {
     public class BranchLightDTO
     {
+    
         public int Id { get; set; }
+        public string PlaceName { get; set; } = string.Empty;
         public string Address { get; set; } = string.Empty;
     }
     public class BranchDTO

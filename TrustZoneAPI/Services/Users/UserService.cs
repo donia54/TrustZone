@@ -70,6 +70,10 @@ namespace TrustZoneAPI.Services.Users
                 if (!result.Succeeded)
                 {
                     var errors = result.Errors.Select(e => e.Description).ToList();
+                    if (result.Errors.Any(e => e.Code.Contains("Password")))
+                    {
+                        errors.Add("Password must be at least 6 characters long and contain at least one uppercase letter, one lowercase letter, one digit, and one special character.");
+                    }
                     return ResponseResult<AuthDTO>.Error(errors, 400);
                 }
 

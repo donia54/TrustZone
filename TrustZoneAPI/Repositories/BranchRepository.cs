@@ -75,6 +75,7 @@ namespace TrustZoneAPI.Repositories
         {
             return await _context.Branches
                 .AsNoTracking()
+                 .Include(b => b.Place)
                 .Where(b => b.Place.Name.Contains(query) || b.Place.Category.Name.Contains(query) || b.Place.Details.Contains(query))
                 .OrderBy(b => b.Place.Name)
                 .Skip((page - 1) * pageSize)

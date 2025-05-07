@@ -6,19 +6,19 @@ namespace TrustZoneAPI.DTOs.User
     {
         [Required]
         [EmailAddress]
-        public string Email { get; set; }
+        public required string Email { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public required string Password { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
+        public required string ConfirmPassword { get; set; }
 
         [Required]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required]
         public int Age { get; set; }
