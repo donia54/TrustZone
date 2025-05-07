@@ -21,38 +21,16 @@ public class ChatHub : Hub
         _userService = userService;
     }
     // send message to a specific user
-    public async Task SendMessage(string receiverId, string senderId, string message)
+    public async Task SendMessage(string receiverId, string message)
     {
-        if (UserConnections.TryGetValue(receiverId, out var receiverConnectionId))
-        {
-            Console.WriteLine($"SendMessage called with receiverId={receiverId}, senderId={senderId}");
+        var senderId = Context.UserIdentifier;
+        await Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, message);
 
-            if (receiverConnectionId != null)
-            await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderId, message);
-        }
-        else
-        {
-            // إذا لم يكن المستخدم متصلًا
-        //    await Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, message);
-        }
     }
     public override async Task OnConnectedAsync()
     {
-        var httpContext = Context.GetHttpContext();
-        var token = httpContext.Request.Query["access_token"].ToString();
-
-        if (!string.IsNullOrWhiteSpace(token))
-        {
-
-            var jwtSecurityToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
-            var userId = jwtSecurityToken.Claims.FirstOrDefault(c => c.Type == "Uid")?.Value;
-
-            if (!string.IsNullOrEmpty(userId))
-            {
-                UserConnections[userId] = Context.ConnectionId;
-            }
-        }
-
+        var userId = Context.UserIdentifier;
+        Console.WriteLine($"User connected: {userId}");
         await base.OnConnectedAsync();
     }
 
