@@ -33,13 +33,6 @@ namespace TrustZoneAPI.Controllers.Users
             return MapResponseToActionResult(response);
         }
 
-        [Authorize]
-        [HttpGet("{userId}")]
-        public async Task<ActionResult> GetUserProfile(string userId)
-        {
-            var response = await _userProfileService.GetUserProfileAsync(userId);
-            return MapResponseToActionResult(response);
-        }
 
 
         [Authorize]
