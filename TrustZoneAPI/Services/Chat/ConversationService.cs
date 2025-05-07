@@ -1,10 +1,12 @@
-﻿using TrustZoneAPI.DTOs.Chat;
+﻿using Microsoft.AspNetCore.SignalR;
+using TrustZoneAPI.DTOs.Chat;
 using TrustZoneAPI.DTOs.Users;
+using TrustZoneAPI.Hubs;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Services.Users;
 
-namespace TrustZoneAPI.Services.Conversations;
+namespace TrustZoneAPI.Services.Chat;
 public interface IConversationService
 {
     Task<ResponseResult<ConversationDTO>> GetByIdAsync(int id);
@@ -22,11 +24,14 @@ public class ConversationService : IConversationService
 {
     private readonly IConversationRepository _repository;
     private readonly IUserService _userService;
+    private readonly IHubContext<ChatHub> _hubContext;
 
-    public ConversationService(IConversationRepository conversationRepository,IUserService userService)
+    public ConversationService(IConversationRepository conversationRepository,IUserService userService
+                                , IHubContext<ChatHub> hubContext)
     {
         _repository = conversationRepository;
         _userService = userService;
+        _hubContext = hubContext;
     }
 
 
@@ -79,9 +84,17 @@ public class ConversationService : IConversationService
         };
 
         var success = await _repository.AddAsync(conversation);
-        return success
-            ? ResponseResult<int>.Created(conversation.Id)
-            : ResponseResult<int>.Error("Failed to create conversation.", 500);
+        if( success)
+        {
+            await _hubContext.Clients.User(User2Id)
+                .SendAsync("NewConversation", conversation.Id, CurrentUserId);
+
+            return ResponseResult<int>.Created(conversation.Id);
+        }
+        else
+        {
+            return ResponseResult<int>.Error("Failed to create conversation.", 500);
+        }
     }
 
     public async Task<bool> UpdateLastMessageAtAsync(int id,DateTime LastMessageAt)

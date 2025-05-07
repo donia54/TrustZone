@@ -15,12 +15,10 @@ using Microsoft.Extensions.Options;
 using TrustZoneAPI.MiddleWares;
 using TrustZoneAPI.Services.Azure;
 using TrustZoneAPI.Services.Disabilities;
-using TrustZoneAPI.Services.Conversations;
-using TrustZoneAPI.Services.Messages;
-using TrustZoneAPI.Services.AccessibilityFeatures;
-using TrustZoneAPI.Services.Events;
-using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Repositories;
+using TrustZoneAPI.Repositories.Interfaces;
+using TrustZoneAPI.Services.Chat;
+using TrustZoneAPI.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,23 +65,6 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IUserDisabilityRepository, UserDisabilityRepository>();
 builder.Services.AddScoped<IUserDisabilityService, UserDisabilityService>();
-builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
-builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
-builder.Services.AddScoped<IAccessibilityFeatureRepository, AccessibilityFeatureRepository>();
-builder.Services.AddScoped<IAccessibilityFeatureService, AccessibilityFeatureService>();
-builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
-builder.Services.AddScoped<IPlaceFeatureService, PlaceFeatureService>();
-builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
-builder.Services.AddScoped<IReviewService, ReviewService>();
-builder.Services.AddScoped<IBranchPhotoRepository, BranchPhotoRepository>();
-builder.Services.AddScoped<IBranchPhotoService, BranchPhotoService>();
-builder.Services.AddScoped<IEventRepository, EventRepository>();
-builder.Services.AddScoped<IEventService, EventService>();
-builder.Services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
-builder.Services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
-
-
-
 
 
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
@@ -99,8 +80,17 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
-builder.Services.AddSignalR();
 
+builder.Services.AddScoped<IPlaceFeatureService, PlaceFeatureService>();
+builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
+builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
+builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
+builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
+
+
+builder.Services.AddScoped<ChatHub>();
+
+builder.Services.AddSignalR();
 
 // For CurrenUserId
 builder.Services.AddHttpContextAccessor();
@@ -170,11 +160,14 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins("*")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
+
+
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 
 var app = builder.Build();
@@ -200,4 +193,7 @@ app.UseAuthorization();
 app.MapControllers();
 //app.MapRazorPages();
 app.MapHub<SearchHub>("/searchHub");
+
+app.MapHub<ChatHub>("/chatHub");
+
 app.Run();

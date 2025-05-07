@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using TrustZoneAPI.DTOs.Users;
-using TrustZoneAPI.Services.Messages;
 
 namespace TrustZoneAPI.DTOs.Chat
 {

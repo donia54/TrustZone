@@ -1,11 +1,12 @@
-﻿using TrustZoneAPI.DTOs.Chat;
+﻿using Microsoft.AspNetCore.SignalR;
+using TrustZoneAPI.DTOs.Chat;
 using TrustZoneAPI.DTOs.Users;
+using TrustZoneAPI.Hubs;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories;
-using TrustZoneAPI.Services.Conversations;
 using TrustZoneAPI.Services.Users;
 
-namespace TrustZoneAPI.Services.Messages;
+namespace TrustZoneAPI.Services.Chat;
 
 // Note: I need to organize UserId and CurrentUserId between UserSerivce and BaseController (When I reach there) Incha'Allah.
 public interface IMessageService
@@ -23,12 +24,14 @@ public class MessageService : IMessageService
     private readonly ITMessageRepository _repository;
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
+    private readonly ChatHub _hubContext;
     public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
-        ,IUserService userService)
+        ,IUserService userService, ChatHub hubContext)
     {
         _repository = messageRepository;
         _conversationService = conversationService;
         _userService = userService;
+        _hubContext = hubContext;
     }
 
     public async Task<ResponseResult<MessageDTO>> GetByIdAsync(int id)
@@ -56,13 +59,24 @@ public class MessageService : IMessageService
     public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto)
     {
         // Note ye Donia: ConversationId preffered to be Guid or string as Guid.ToString(), not int.
+
+        var currentUserId = _userService.GetCurrentUserId(); // I think this is not the best way.
+
+
         int currentConversationId = dto.ConversationId;
         if (currentConversationId == 0)
         {
-           var result = await _conversationService.CreateAsync(dto.User2Id);
-            if(!result.IsSuccess)
-                return ResponseResult.Error($"{result.ErrorMessage}", result.StatusCode);
-            currentConversationId = result.Data;
+            var conversation = await _conversationService.GetConversationBetweenUsersAsync(currentUserId, dto.User2Id);
+           
+            if(conversation.Data != null)
+            currentConversationId = conversation.Data.Id;
+            if (currentConversationId == 0)
+            {
+                var result = await _conversationService.CreateAsync(dto.User2Id);
+                if (!result.IsSuccess)
+                    return ResponseResult.Error($"{result.ErrorMessage}", result.StatusCode);
+                currentConversationId = result.Data;
+            }
         }
         //var IsConversationExists = await _conversationService.IsConversationExists(currentConversationId);
         //if (!IsConversationExists)
@@ -74,16 +88,27 @@ public class MessageService : IMessageService
 
         var message = new TMessage
         {
-            ConversationId = dto.ConversationId,
-            SenderId = _userService.GetCurrentUserId(), // I think this is not the best way.
+            ConversationId = currentConversationId,
+            SenderId = currentUserId,
             Content = dto.Content,
             IsRead = false
         };
 
         var success = await _repository.AddAsync(message);
-        return success 
-            ? ResponseResult.Created() 
-            : ResponseResult.Error("Failed to create message.", 500);
+
+        if(success)
+        {
+            var receiverId = dto.User2Id; // المستخدم الآخر في المحادثة
+            await _hubContext.SendMessage(receiverId, currentUserId, dto.Content);
+
+            return ResponseResult.Created();
+        }
+        else
+        {
+            return ResponseResult.Error("Failed to create message.", 500);
+        }
+
+
     }
 
     public async Task<ResponseResult> UpdateAsync(int id, UpdateMessageDTO dto)
@@ -127,7 +152,7 @@ public class MessageService : IMessageService
             SentAt = message.SentAt,
             IsRead = message.IsRead,
             ReadAt = message.ReadAt,
-            Sender = ((message.Sender != null)  && (message.Sender.UserName != null)) ? new UserBasicDTO
+            Sender = message.Sender != null  && message.Sender.UserName != null ? new UserBasicDTO
 
             {
                 Id = message.Sender.Id,
