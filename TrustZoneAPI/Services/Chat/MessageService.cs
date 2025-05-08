@@ -99,7 +99,7 @@ public class MessageService : IMessageService
         if(success)
         {
             var receiverId = dto.User2Id; 
-            await _hubContext.SendMessage(receiverId,  dto.Content);
+            await _hubContext.SendMessage(receiverId, currentUserId, dto.Content);
 
             return ResponseResult.Created();
         }
