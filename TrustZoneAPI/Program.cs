@@ -22,6 +22,7 @@ using TrustZoneAPI.Hubs;
 using System.Security.Claims;
 using TrustZoneAPI.Services.SignalR;
 using TrustZoneAPI.Services.AccessibilityFeatures;
+using TrustZoneAPI.Services.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -98,6 +99,9 @@ builder.Services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
 
 builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
 builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
+
+builder.Services.AddScoped<IEventService, EventService>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
 
 builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
