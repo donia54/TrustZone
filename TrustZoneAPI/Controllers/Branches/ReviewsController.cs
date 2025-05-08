@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TrustZoneAPI.Services.Places;
 using static TrustZoneAPI.DTOs.Places.ReviewsDTOs;
@@ -7,6 +8,7 @@ namespace TrustZoneAPI.Controllers.Branches
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class ReviewsController : BaseController
     {
 
@@ -41,7 +43,7 @@ namespace TrustZoneAPI.Controllers.Branches
         }
 
         [HttpGet("branch/{branchId}")]
-        public async Task<IActionResult> GetReviewsByBranch(int branchId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetReviewsByBranch(int branchId, [FromQuery] int page = 1, [FromQuery] int pageSize = 80)
         {
             var result = await _reviewService.GetReviewsByBranchAsync(branchId, page, pageSize);
             return MapResponseToActionResult(result);

@@ -21,6 +21,7 @@ using TrustZoneAPI.Services.Chat;
 using TrustZoneAPI.Hubs;
 using System.Security.Claims;
 using TrustZoneAPI.Services.SignalR;
+using TrustZoneAPI.Services.AccessibilityFeatures;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -57,14 +58,19 @@ builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
 
 builder.Services.AddScoped<IPlaceRepository, PlaceRepository>();
 builder.Services.AddScoped<IPlaceService, PlaceService>();
+
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
+
 builder.Services.AddScoped<IBranchRepository, BranchRepository>();
 builder.Services.AddScoped<IBranchService, BranchService>();
+
 builder.Services.AddScoped<IBranchOpeningHourRepository, BranchOpeningHourRepository>();
 builder.Services.AddScoped<IBranchOpeningHourService, BranchOpeningHourService>();
+
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
+
 builder.Services.AddScoped<IUserDisabilityRepository, UserDisabilityRepository>();
 builder.Services.AddScoped<IUserDisabilityService, UserDisabilityService>();
 
@@ -83,11 +89,25 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
 builder.Services.AddScoped<ITransactionService, TransactionService>();
 
+builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
+builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
 builder.Services.AddScoped<IPlaceFeatureService, PlaceFeatureService>();
+
+builder.Services.AddScoped<IFavoritePlaceRepository, FavoritePlaceRepository>();
+builder.Services.AddScoped<IFavoritePlaceService, FavoritePlaceService>();
+
 builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
-builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
-builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
 builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
+
+builder.Services.AddScoped<IReviewRepository, ReviewRepository>();
+builder.Services.AddScoped<IReviewService, ReviewService>();
+
+builder.Services.AddScoped<IAccessibilityFeatureRepository, AccessibilityFeatureRepository>();
+builder.Services.AddScoped<IAccessibilityFeatureService, AccessibilityFeatureService>();
+
+builder.Services.AddScoped<IBranchPhotoRepository, BranchPhotoRepository>();
+builder.Services.AddScoped<IBranchPhotoService, BranchPhotoService>();
+
 
 builder.Services.AddScoped<ISignalRMessageSender, SignalRMessageSender>();
 
@@ -180,14 +200,25 @@ builder.Services.AddSwaggerGen();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(policy =>
+//    {
+//        policy.WithOrigins("*")
+//              .AllowAnyHeader()
+//              .AllowAnyMethod();
+//              //.AllowCredentials();
+//    });
+//});
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("*")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
-              //.AllowCredentials();
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
