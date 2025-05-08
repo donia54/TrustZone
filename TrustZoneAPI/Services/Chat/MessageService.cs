@@ -13,7 +13,7 @@ public interface IMessageService
 {
     Task<ResponseResult<MessageDTO>> GetByIdAsync(int id);
     Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesByConversationAsync(int conversationId, int page = 1);
-    Task<ResponseResult> CreateAsync(CreateMessageDTO dto,string currentUserId);
+    Task<ResponseResult> CreateAsync(CreateMessageDTO dto);
     Task<ResponseResult> UpdateAsync(int id, UpdateMessageDTO dto);
     Task<ResponseResult> DeleteAsync(int id, string CurrentUserId);
     Task<ResponseResult> MarkAsReadAsync(int messageId); // I think this should be internal only.
@@ -24,9 +24,9 @@ public class MessageService : IMessageService
     private readonly ITMessageRepository _repository;
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
-    private readonly ChatHub _hubContext;
+    private readonly chatHub _hubContext;
     public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
-        ,IUserService userService, ChatHub hubContext)
+        ,IUserService userService, chatHub hubContext)
     {
         _repository = messageRepository;
         _conversationService = conversationService;
@@ -56,11 +56,11 @@ public class MessageService : IMessageService
         return ResponseResult<IEnumerable<MessageDTO>>.Success(messageDtos);
     }
 
-    public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto, string currentUserId)
+    public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto)
     {
         // Note ye Donia: ConversationId preffered to be Guid or string as Guid.ToString(), not int.
 
-       // var currentUserId = _userService.GetCurrentUserId(); // I think this is not the best way.
+        var currentUserId = _userService.GetCurrentUserId(); // I think this is not the best way.
 
 
         int currentConversationId = dto.ConversationId;
@@ -98,8 +98,8 @@ public class MessageService : IMessageService
 
         if(success)
         {
-            var receiverId = dto.User2Id; 
-            await _hubContext.SendMessage(receiverId,  dto.Content);
+            var receiverId = dto.User2Id; // المستخدم الآخر في المحادثة
+            await _hubContext.SendMessage(receiverId, currentUserId, dto.Content);
 
             return ResponseResult.Created();
         }
@@ -117,7 +117,7 @@ public class MessageService : IMessageService
         if (message == null) 
             return ResponseResult.NotFound("Message not found.");
 
-        if (! _userService.IsCurrentUser(message.SenderId))
+        if (_userService.IsCurrentUser(message.SenderId))
             return ResponseResult.NotFound("You are not allowed to update this message.");
 
         message.Content = dto.Content;
@@ -133,7 +133,7 @@ public class MessageService : IMessageService
         if (message == null)
             return ResponseResult.NotFound("Message not found.");
 
-        if (! _userService.IsCurrentUser(message.SenderId))
+        if (_userService.IsCurrentUser(message.SenderId))
             return ResponseResult.NotFound("You are not allowed to delete this message.");
         
         var success = await _repository.DeleteAsync(id);
@@ -162,6 +162,7 @@ public class MessageService : IMessageService
     }
     public async Task<ResponseResult> MarkAsReadAsync(int messageId)
     {
+        // هاذ بدها شوية شغل... خليها لحد ما أجهّز السيجنال آر بتوضح الأمور وقتها إن شاء الله
         var message = await _repository.GetByIdAsync(messageId);
         if (message == null)
             return ResponseResult.NotFound("Message not found.");
@@ -172,6 +173,7 @@ public class MessageService : IMessageService
 
         var currentUserId = _userService.GetCurrentUserId();
 
+        // تحديث الرسائل باستخدام استعلام SQL مباشر
         var success = await _repository.MarkMessagesAsReadAsync(message.ConversationId, message.SentAt, currentUserId);
         return success
             ? ResponseResult.Success()

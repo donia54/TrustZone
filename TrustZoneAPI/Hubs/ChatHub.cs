@@ -8,7 +8,7 @@ using TrustZoneAPI.Services.Users;
 
 namespace TrustZoneAPI.Hubs;
 
-public class ChatHub : Hub
+public class chatHub : Hub
 {
     // Concurrent dictionary to store the last seen time for each user
     private static readonly ConcurrentDictionary<string, DateTime> UserLastSeen = new();
@@ -16,7 +16,7 @@ public class ChatHub : Hub
 
 
     private readonly IUserService _userService;
-    public ChatHub(IUserService userService)
+    public chatHub(IUserService userService)
     {
         _userService = userService;
     }

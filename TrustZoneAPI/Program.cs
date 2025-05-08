@@ -19,6 +19,7 @@ using TrustZoneAPI.Repositories;
 using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Chat;
 using TrustZoneAPI.Hubs;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,7 +89,7 @@ builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
 builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
 
 
-builder.Services.AddScoped<ChatHub>();
+builder.Services.AddScoped<chatHub>();
 
 builder.Services.AddSignalR();
 
@@ -147,7 +148,7 @@ builder.Services.AddAuthentication(options =>
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Key"])),
 
 
-        NameClaimType = "Uid"
+        NameClaimType = ClaimTypes.NameIdentifier
     };
 
 
@@ -182,7 +183,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("*")
+        policy.WithOrigins("http://127.0.0.1:5500")
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -216,6 +217,6 @@ app.MapControllers();
 //app.MapRazorPages();
 app.MapHub<SearchHub>("/searchHub");
 
-app.MapHub<ChatHub>("/chatHub");
+app.MapHub<chatHub>("/chatHub");
 
 app.Run();

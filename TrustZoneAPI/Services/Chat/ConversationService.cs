@@ -24,10 +24,10 @@ public class ConversationService : IConversationService
 {
     private readonly IConversationRepository _repository;
     private readonly IUserService _userService;
-    private readonly IHubContext<ChatHub> _hubContext;
+    private readonly IHubContext<chatHub> _hubContext;
 
     public ConversationService(IConversationRepository conversationRepository,IUserService userService
-                                , IHubContext<ChatHub> hubContext)
+                                , IHubContext<chatHub> hubContext)
     {
         _repository = conversationRepository;
         _userService = userService;
