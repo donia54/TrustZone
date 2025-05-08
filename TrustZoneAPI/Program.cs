@@ -127,7 +127,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -136,7 +135,7 @@ builder.Services.AddAuthentication(options =>
 .AddJwtBearer(o =>
 {
     o.RequireHttpsMetadata = false;
-    o.SaveToken = false; 
+    o.SaveToken = false;
     o.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -167,10 +166,7 @@ builder.Services.AddAuthentication(options =>
             return Task.CompletedTask;
         }
     };
-
-
 });
-
 builder.Services.AddHttpContextAccessor();
 
 
