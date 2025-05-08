@@ -27,7 +27,7 @@ namespace TrustZoneAPI.Controllers.chat
         [HttpPost]
         public async Task<ActionResult> Create([FromBody] CreateMessageDTO createDto)
         {
-            var result = await _messageService.CreateAsync(createDto,CurrentUserId);
+            var result = await _messageService.CreateAsync(createDto);
             return MapResponseToActionResult(result);
         }
 

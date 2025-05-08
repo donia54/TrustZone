@@ -4,6 +4,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 using NuGet.Protocol.Plugins;
 using TrustZoneAPI.Models;
+using TrustZoneAPI.Services.SignalR;
 using TrustZoneAPI.Services.Users;
 
 namespace TrustZoneAPI.Hubs;
@@ -12,30 +13,17 @@ public class chatHub : Hub
 {
     // Concurrent dictionary to store the last seen time for each user
     private static readonly ConcurrentDictionary<string, DateTime> UserLastSeen = new();
-    private static readonly ConcurrentDictionary<string, string> UserConnections = new();
 
 
     private readonly IUserService _userService;
-    public chatHub(IUserService userService)
+    private readonly IConnectionService _connectionService;
+
+    public chatHub(IUserService userService, IConnectionService connectionManager)
     {
         _userService = userService;
+        _connectionService = connectionManager;
     }
-    // send message to a specific user
-    public async Task SendMessage(string receiverId, string senderId, string message)
-    {
-        if (UserConnections.TryGetValue(receiverId, out var receiverConnectionId))
-        {
-            Console.WriteLine($"SendMessage called with receiverId={receiverId}, senderId={senderId}");
 
-            if (receiverConnectionId != null)
-                await Clients.Client(receiverConnectionId).SendAsync("ReceiveMessage", senderId, message);
-        }
-        else
-        {
-            // إذا لم يكن المستخدم متصلًا
-            //    await Clients.User(receiverId).SendAsync("ReceiveMessage", senderId, message);
-        }
-    }
     public override async Task OnConnectedAsync()
     {
         var httpContext = Context.GetHttpContext();
@@ -49,7 +37,7 @@ public class chatHub : Hub
 
             if (!string.IsNullOrEmpty(userId))
             {
-                UserConnections[userId] = Context.ConnectionId;
+                _connectionService.AddConnection(userId, Context.ConnectionId);
             }
         }
 
@@ -62,7 +50,7 @@ public class chatHub : Hub
         var userId = _userService.GetCurrentUserId();
         if (!string.IsNullOrEmpty(userId))
         {
-            // Update last seen
+            _connectionService.RemoveConnection(userId);
             UserLastSeen[userId] = DateTime.UtcNow;
         }
         await base.OnDisconnectedAsync(exception);

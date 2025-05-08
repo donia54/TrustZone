@@ -20,6 +20,7 @@ using TrustZoneAPI.Repositories.Interfaces;
 using TrustZoneAPI.Services.Chat;
 using TrustZoneAPI.Hubs;
 using System.Security.Claims;
+using TrustZoneAPI.Services.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -87,6 +88,10 @@ builder.Services.AddScoped<IDisabilityTypeService, DisabilityTypeService>();
 builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
 builder.Services.AddScoped<IPlaceFeatureRepository, PlaceFeatureRepository>();
 builder.Services.AddScoped<IDisabilityTypeRepository, DisabilityTypeRepository>();
+
+builder.Services.AddScoped<ISignalRMessageSender, SignalRMessageSender>();
+
+builder.Services.AddSingleton<IConnectionService, ConnectionService>();
 
 
 builder.Services.AddScoped<chatHub>();
@@ -181,7 +186,8 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins("http://127.0.0.1:5500")
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -190,6 +196,9 @@ builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 
 var app = builder.Build();
+
+
+app.UseRouting();
 
 
 app.UseCors();

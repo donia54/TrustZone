@@ -24,14 +24,14 @@ public class MessageService : IMessageService
     private readonly ITMessageRepository _repository;
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
-    private readonly chatHub _hubContext;
+    private readonly ISignalRMessageSender _signalRMessage;
     public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
-        ,IUserService userService, chatHub hubContext)
+        ,IUserService userService, ISignalRMessageSender signalRMessage)
     {
         _repository = messageRepository;
         _conversationService = conversationService;
         _userService = userService;
-        _hubContext = hubContext;
+        _signalRMessage = signalRMessage;
     }
 
     public async Task<ResponseResult<MessageDTO>> GetByIdAsync(int id)
@@ -63,9 +63,7 @@ public class MessageService : IMessageService
         var currentUserId = _userService.GetCurrentUserId(); // I think this is not the best way.
 
 
-        int currentConversationId = dto.ConversationId;
-        if (currentConversationId == 0)
-        {
+            int currentConversationId = 0;
             var conversation = await _conversationService.GetConversationBetweenUsersAsync(currentUserId, dto.User2Id);
            
             if(conversation.Data != null)
@@ -77,7 +75,6 @@ public class MessageService : IMessageService
                     return ResponseResult.Error($"{result.ErrorMessage}", result.StatusCode);
                 currentConversationId = result.Data;
             }
-        }
         //var IsConversationExists = await _conversationService.IsConversationExists(currentConversationId);
         //if (!IsConversationExists)
         //    return ResponseResult.Error("Conversation not found.", 404);
@@ -98,8 +95,9 @@ public class MessageService : IMessageService
 
         if(success)
         {
-            var receiverId = dto.User2Id; // المستخدم الآخر في المحادثة
-            await _hubContext.SendMessage(receiverId, currentUserId, dto.Content);
+            var receiverId = dto.User2Id;
+            var senderId = currentUserId;
+            await _signalRMessage.SendToClient(receiverId, senderId, dto.Content);
 
             return ResponseResult.Created();
         }

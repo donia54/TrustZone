@@ -16,9 +16,6 @@ namespace TrustZoneAPI.DTOs.Chat
     }
     public class CreateMessageDTO
     {
-        [Required(ErrorMessage = "Conversation ID is required")]
-        public int ConversationId { get; set; }
-
         [Required(ErrorMessage = "Message content is required")]
         [StringLength(2000, ErrorMessage = "Message content must be between 1 and 2000 characters", MinimumLength = 1)]
         public string Content { get; set; } = null!;
