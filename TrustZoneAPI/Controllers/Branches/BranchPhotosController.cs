@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TrustZoneAPI.DTOs.Places;
 using TrustZoneAPI.Services.Places;
@@ -7,6 +8,7 @@ namespace TrustZoneAPI.Controllers.Branches
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class BranchPhotosController : BaseController
     {
 
@@ -25,6 +27,7 @@ namespace TrustZoneAPI.Controllers.Branches
         }
 
         [HttpPost]
+        [Authorize]
         public async Task<IActionResult> Create([FromBody] CreateBranchPhotoDto dto)
         {
           

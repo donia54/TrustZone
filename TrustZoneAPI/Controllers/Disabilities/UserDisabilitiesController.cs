@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.Services.Disabilities;
@@ -7,6 +8,7 @@ namespace TrustZoneAPI.Controllers.Disabilities
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class UserDisabilitiesController : BaseController
     {
 
