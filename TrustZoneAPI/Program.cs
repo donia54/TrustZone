@@ -204,27 +204,30 @@ builder.Services.AddSwaggerGen();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-//builder.Services.AddCors(options =>
-//{
-//    options.AddDefaultPolicy(policy =>
-//    {
-//        policy.WithOrigins("*")
-//              .AllowAnyHeader()
-//              .AllowAnyMethod();
-//              //.AllowCredentials();
-//    });
-//});
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins("http://127.0.0.1:5500",
+                "http://localhost:5500",
+                "https://localhost:5500",
+                "https://trustzone.azurewebsites.net")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+        .AllowCredentials();
     });
 });
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(policy =>
+//    {
+//        policy
+//            .AllowAnyOrigin()
+//            .AllowAnyHeader()
+//            .AllowAnyMethod();
+//    });
+//});
 
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
