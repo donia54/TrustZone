@@ -220,16 +220,30 @@ builder.Services.AddOpenApi();
 //    });
 //});
 
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.WithOrigins("*")
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+       // .AllowCredentials();
     });
 });
+
+
+
+//builder.Services.AddCors(options =>
+//{
+//    options.AddDefaultPolicy(policy =>
+//    {
+//        policy
+//            .AllowAnyOrigin()
+//            .AllowAnyHeader()
+//            .AllowAnyMethod();
+//    });
+//});
 
 
 builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();

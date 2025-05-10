@@ -24,17 +24,17 @@ namespace TrustZoneAPI.Controllers.chat
             return MapResponseToActionResult(result);
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<ActionResult<IEnumerable<ConversationDTO>>> GetConversationsByUserId(string userId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        [HttpGet("user")]
+        public async Task<ActionResult<IEnumerable<ConversationDTO>>> GetConversationsByUserId( [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var result = await _conversationService.GetConversationsByUserIdAsync(userId, page, pageSize);
+            var result = await _conversationService.GetConversationsByUserIdAsync(CurrentUserId, page, pageSize);
             return MapResponseToActionResult(result);
         }
 
         [HttpGet("between")]
-        public async Task<ActionResult<ConversationDTO>> GetConversationBetweenUsers([FromQuery] string user1Id, [FromQuery] string user2Id)
+        public async Task<ActionResult<ConversationDTO>> GetConversationBetweenUsers( [FromQuery] string user2Id)
         {
-            var result = await _conversationService.GetConversationBetweenUsersAsync(user1Id, user2Id);
+            var result = await _conversationService.GetConversationBetweenUsersAsync(CurrentUserId, user2Id);
             return MapResponseToActionResult(result);
         }
 
