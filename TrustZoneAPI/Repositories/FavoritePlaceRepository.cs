@@ -63,6 +63,7 @@ namespace TrustZoneAPI.Repositories
             return await _context.FavoritePlaces
                 .Where(fp => fp.UserId == userId)
                 .Include(fp => fp.Branch)
+                  .ThenInclude(b => b.Place)
                 .ToListAsync();
         }
 

@@ -99,6 +99,7 @@ namespace TrustZoneAPI.Services.Places
                 {
                     Id = favoritePlace.Branch.Id,
                     Address = favoritePlace.Branch.Address,
+                    PlaceName= favoritePlace.Branch.Place?.Name ?? string.Empty
                 }
             };
         }
