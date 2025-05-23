@@ -79,13 +79,17 @@ namespace TrustZoneAPI.Controllers.Places
 
 
         [HttpGet("search")]
-        public async Task<IActionResult> Search([FromQuery] string query, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> Search(
+      [FromQuery] BranchSearchRequestDTO searchRequest,  
+      [FromQuery] int page = 1,
+      [FromQuery] int pageSize = 10)
         {
-            if (string.IsNullOrWhiteSpace(query))
+            if (string.IsNullOrWhiteSpace(searchRequest.Query))
                 return BadRequest("Search query cannot be empty.");
 
-            var result = await _branchService.SearchBranchesAsync(query, page, pageSize);
+            var result = await _branchService.SearchBranchesAsync(searchRequest, page, pageSize);
             return Ok(result);
         }
+
     }
 }

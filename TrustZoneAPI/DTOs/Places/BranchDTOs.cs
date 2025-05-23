@@ -69,4 +69,13 @@ namespace TrustZoneAPI.DTOs.Places
         public bool IsClosed { get; set; }
         public string? SpecialNotes { get; set; }
     }
+
+
+    public class BranchSearchRequestDTO
+    {
+        public string Query { get; set; } = string.Empty;
+        public int CategoryId { get; set; } = 0;
+       
+    }
+
 }

@@ -19,7 +19,7 @@ namespace TrustZoneAPI.Services.Places
 
         Task<ResponseResult<IEnumerable<BranchDTO>>> GetBranchesByCategoryIdAsync(int categoryId);
         Task<ResponseResult<IEnumerable<BranchLightDTO>>> FilterBranchesByFeaturesAsync(List<int> featureIds);
-        Task<IEnumerable<BranchLightDTO>> SearchBranchesAsync(string query, int page, int pageSize);
+        Task<IEnumerable<BranchLightDTO>> SearchBranchesAsync(BranchSearchRequestDTO dto, int page, int pageSize);
         Task<ResponseResult<IEnumerable<BranchLightDTO>>> GetBranchesWithFeatureAsync(int featureId);
 
 
@@ -123,9 +123,9 @@ public class BranchService : IBranchService
             return ResponseResult<IEnumerable<BranchLightDTO>>.Success(branchesDtos);
         }
 
-        public async Task<IEnumerable<BranchLightDTO>> SearchBranchesAsync(string query, int page, int pageSize)
+        public async Task<IEnumerable<BranchLightDTO>> SearchBranchesAsync(BranchSearchRequestDTO dto, int page, int pageSize)
         {
-            var branches = await _branchRepository.SearchBranchesAsync(query, page, pageSize);
+            var branches = await _branchRepository.SearchBranchesAsync(dto.Query, dto.CategoryId, page, pageSize);
 
             var results = branches.Select(_ConvertToLightDTO).ToList();
             if (!results.Any())
@@ -135,6 +135,7 @@ public class BranchService : IBranchService
 
             return results;
         }
+
 
         public async Task<ResponseResult<IEnumerable<BranchLightDTO>>> FilterBranchesByFeaturesAsync(List<int> featureIds)
         {
