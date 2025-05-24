@@ -119,11 +119,11 @@ namespace TrustZoneAPI.Services.Places
                     return ResponseResult<bool>.NotFound("Branch not found");
                 }
 
-                // Validate time if not closed
-                if (!createDto.IsClosed && createDto.OpeningTime >= createDto.ClosingTime)
-                {
-                    return ResponseResult<bool>.Error("Opening time must be before closing time", 400);
-                }
+                //// Validate time if not closed
+                //if (!createDto.IsClosed && createDto.OpeningTime >= createDto.ClosingTime)
+                //{
+                //    return ResponseResult<bool>.Error("Opening time must be before closing time", 400);
+                //}
 
                 var entity = _CreateEntityFromDto(createDto);
 

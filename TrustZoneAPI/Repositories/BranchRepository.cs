@@ -18,11 +18,13 @@ namespace TrustZoneAPI.Repositories
         {
             return await _context.Branches.ToListAsync();
         }
-
         public async Task<Branch?> GetByIdAsync(int id)
         {
-            return await _context.Branches.FindAsync(id);
+            return await _context.Branches
+                .Include(b => b.BranchOpeningHours)
+                .FirstOrDefaultAsync(b => b.Id == id);
         }
+
 
         public async Task<bool> AddAsync(Branch entity)
         {
