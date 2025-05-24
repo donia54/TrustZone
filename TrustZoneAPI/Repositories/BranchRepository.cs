@@ -73,19 +73,25 @@ namespace TrustZoneAPI.Repositories
 
         public async Task<IEnumerable<Branch>> SearchBranchesAsync(string query, int categoryId, int page, int pageSize)
         {
-            return await _context.Branches
+            query = query?.Trim().ToLower() ?? string.Empty;
+
+            var branchesQuery = _context.Branches
                 .AsNoTracking()
                 .Include(b => b.Place)
+                .ThenInclude(p => p.Category)
                 .Where(b =>
-                    b.Place.CategoryId == categoryId && // filter by category
-                    (b.Place.Name.Contains(query) ||
-                     b.Place.Category.Name.Contains(query) ||
-                     b.Place.Details.Contains(query)))
+                    (categoryId == 0 || b.Place.CategoryId == categoryId) &&
+                    (string.IsNullOrEmpty(query) ||
+                     b.Place.Name.ToLower().Contains(query) ||
+                     b.Place.Details.ToLower().Contains(query) ||
+                     b.Place.Category.Name.ToLower().Contains(query)))
                 .OrderBy(b => b.Place.Name)
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .Take(pageSize);
+
+            return await branchesQuery.ToListAsync();
         }
+
 
 
 
