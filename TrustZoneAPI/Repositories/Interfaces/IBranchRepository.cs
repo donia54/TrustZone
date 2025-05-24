@@ -7,7 +7,7 @@ namespace TrustZoneAPI.Repositories.Interfaces
         Task<IEnumerable<Branch>> GetBranchesByCategoryIdAsync(int categoryId);
         Task<IEnumerable<Branch>> FilterBranchesByPlaceFeaturesAsync(List<int> featureIds);
         Task<IEnumerable<Branch>> GetBranchesWithFeatureAsync(int featureId);
-        Task<IEnumerable<Branch>> SearchBranchesAsync(string query, int categoryId, int page, int pageSize);
+        Task<IEnumerable<Branch>> SearchBranchesAsync(string query ,int page, int pageSize);
 
 
 
