@@ -1,4 +1,5 @@
-﻿using NuGet.Protocol.Core.Types;
+﻿using Microsoft.EntityFrameworkCore;
+using NuGet.Protocol.Core.Types;
 using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.Models;
 using TrustZoneAPI.Repositories.Interfaces;
@@ -9,8 +10,12 @@ namespace TrustZoneAPI.Services.Disabilities
     {
         Task<ResponseResult<List<UserDisabilityDto>>> GetAllAsync();
         Task<ResponseResult<UserDisabilityDto>> GetByIdAsync(int id);
+
+        Task<UserDisability?> GetByUserIdAsync(string userId);
         Task<ResponseResult> AddAsync(UserDisabilityCreateDTO dto);
         Task<ResponseResult> DeleteAsync(int id);
+
+        Task<ResponseResult> UpdateAsync(int id, UserDisabilityCreateDTO dto);
         Task<ResponseResult<List<DisabilityTypeDTO>>> GetUserDisabilitiesByUserIdAsync(string userId);
         Task<ResponseResult> SetUserDisabilityTypesAsync(string userId, List<int> disabilityTypeIds);
     }
@@ -35,6 +40,11 @@ namespace TrustZoneAPI.Services.Disabilities
             var result = data.Select(_MapToDTO).ToList();
 
             return ResponseResult<List<UserDisabilityDto>>.Success(result);
+        }
+
+        public async Task<UserDisability?> GetByUserIdAsync(string userId)
+        {
+            return await _userDisabilityRepository.GetByUserIdAsync(userId);    
         }
 
 
@@ -83,6 +93,30 @@ namespace TrustZoneAPI.Services.Disabilities
             return result
                 ? ResponseResult.Success()
                 : ResponseResult.NotFound("User disability not found.");
+        }
+
+
+
+        public async Task<ResponseResult> UpdateAsync(int id ,UserDisabilityCreateDTO dto)
+        {
+            try
+            {
+                var userDisability = await _userDisabilityRepository.GetByIdAsync(id);
+                if (userDisability == null)
+                    return ResponseResult.NotFound("User disability not found.");
+                if (!await _disabilityTypeService.IsDisabilityTypeExistsAsync(dto.DisabilityTypeId))
+                    return ResponseResult.NotFound("Disability type not found.");
+                userDisability.UserId = dto.UserId;
+                userDisability.DisabilityTypeId = dto.DisabilityTypeId;
+                var result = await _userDisabilityRepository.UpdateAsync(userDisability);
+                return result
+                    ? ResponseResult.Success()
+                    : ResponseResult.Error("Failed to update user disability.", 500);
+            }
+            catch (Exception ex)
+            {
+                return ResponseResult.FromException(ex);
+            }
         }
 
         // need to review this method

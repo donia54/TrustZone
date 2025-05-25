@@ -81,6 +81,8 @@ public class ConversationService : IConversationService
             User1Id = CurrentUserId,
             User2Id = User2Id,
             CreatedAt = DateTime.UtcNow
+,
+            LastMessageAt = DateTime.UtcNow
         };
 
         var success = await _repository.AddAsync(conversation);
@@ -142,6 +144,10 @@ public class ConversationService : IConversationService
     }
     private static ConversationDTO _ConvertToDTO(Conversation conversation)
     {
+
+        var lastMessage = conversation.TMessages?
+         .OrderByDescending(m => m.SentAt)
+         .FirstOrDefault();
         return new ConversationDTO
         {
             Id = conversation.Id,
@@ -149,6 +155,7 @@ public class ConversationService : IConversationService
             User2Id = conversation.User2Id,
             CreatedAt = conversation.CreatedAt,
             LastMessageAt = conversation.LastMessageAt,
+            LastMessageContent = lastMessage?.Content ?? "No messages yet",
             User1 = conversation.User1 != null && conversation.User1.UserName != null ? new UserBasicDTO
             {
                 Id = conversation.User1.Id,

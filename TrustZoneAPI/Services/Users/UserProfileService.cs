@@ -1,5 +1,6 @@
 ﻿using Azure.Storage.Blobs;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using TrustZoneAPI.DTOs.Disabilities;
 using TrustZoneAPI.DTOs.Users;
@@ -81,8 +82,25 @@ namespace TrustZoneAPI.Services.Users
                 user.Email = dto.Email;
                 user.Age = dto.Age.Value;
 
-            await _userRepository.UpdateAsync(user);
-            return ResponseResult.Success();
+
+               await _userRepository.UpdateAsync(user);
+
+
+                var userDisability = await _userdisability.GetByUserIdAsync(userId);
+
+               
+                    var updateDto = new UserDisabilityCreateDTO
+                    {
+                        // Id = userDisability.Id,
+                        UserId = userId,
+                        DisabilityTypeId = dto.DisabilityType.Value
+                    };
+
+                    var updated = await _userdisability.UpdateAsync(userDisability.Id, updateDto);
+                 
+
+                return ResponseResult.Success();
+          
         }
 
         public async Task<ResponseResult> UpdatePasswordAsync(string userId, UpdatePasswordDTO dto)

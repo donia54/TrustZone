@@ -88,7 +88,10 @@ public class MessageService : IMessageService
             ConversationId = currentConversationId,
             SenderId = currentUserId,
             Content = dto.Content,
-            IsRead = false
+            IsRead = false,
+            SentAt = DateTime.UtcNow
+,
+           
         };
 
         var success = await _repository.AddAsync(message);
@@ -115,7 +118,7 @@ public class MessageService : IMessageService
         if (message == null) 
             return ResponseResult.NotFound("Message not found.");
 
-        if (_userService.IsCurrentUser(message.SenderId))
+        if (!_userService.IsCurrentUser(message.SenderId))
             return ResponseResult.NotFound("You are not allowed to update this message.");
 
         message.Content = dto.Content;
@@ -131,7 +134,7 @@ public class MessageService : IMessageService
         if (message == null)
             return ResponseResult.NotFound("Message not found.");
 
-        if (_userService.IsCurrentUser(message.SenderId))
+        if (!_userService.IsCurrentUser(message.SenderId))
             return ResponseResult.NotFound("You are not allowed to delete this message.");
         
         var success = await _repository.DeleteAsync(id);

@@ -10,6 +10,7 @@ public class ConversationDTO
     public string User2Id { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public DateTime? LastMessageAt { get; set; }
+    public string? LastMessageContent { get; set; }
     public UserBasicDTO? User1 { get; set; }
     public UserBasicDTO? User2 { get; set; }
 }

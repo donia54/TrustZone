@@ -25,6 +25,7 @@ public class ConversationRepository : IConversationRepository
     public async Task<Conversation?> GetByIdAsync(int id)
     {
         return await _context.Conversations
+            .Include(c => c.TMessages)
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
@@ -43,6 +44,9 @@ public class ConversationRepository : IConversationRepository
 
     public async Task<bool> DeleteAsync(Conversation conversation)
     {
+
+        var messages = _context.TMessages.Where(m => m.ConversationId == conversation.Id);
+        _context.TMessages.RemoveRange(messages);
         _context.Conversations.Remove(conversation);
         return await _context.SaveChangesAsync() > 0;
     }
@@ -53,8 +57,13 @@ public class ConversationRepository : IConversationRepository
             .Where(c => c.User1Id == userId || c.User2Id == userId)
             .Include(c => c.User1)
             .Include(c => c.User2)
+              .Include(c => c.TMessages)
             .OrderByDescending(c => c.LastMessageAt)
             .ToListAsync();
+
+      
+
+
     }
     public async Task<IEnumerable<Conversation>> GetConversationsByUserIdAsync(string userId, int page = 1, int pageSize = 20)
     {
@@ -66,6 +75,7 @@ public class ConversationRepository : IConversationRepository
             .Include(c => c.User1)
             .Include(c => c.User2)
             .OrderByDescending(c => c.LastMessageAt)
+            .Include(c => c.TMessages)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();

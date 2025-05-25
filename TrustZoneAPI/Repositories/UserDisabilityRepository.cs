@@ -52,6 +52,13 @@ namespace TrustZoneAPI.Repositories
            .ToListAsync();
         }
 
+
+        public async Task<UserDisability?> GetByUserIdAsync(string userId)
+        {
+            return await _context.UserDisabilities
+                .FirstOrDefaultAsync(ud => ud.UserId == userId);
+        }
+
         public async Task SetUserDisabilityTypesAsync(string userId, List<int> disabilityTypeIds)
         {
             var newDisabilities = disabilityTypeIds.Select(id => new UserDisability
