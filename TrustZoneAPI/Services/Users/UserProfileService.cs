@@ -93,7 +93,7 @@ namespace TrustZoneAPI.Services.Users
                     {
                         // Id = userDisability.Id,
                         UserId = userId,
-                        DisabilityTypeId = dto.DisabilityType.Value
+                     //   DisabilityTypeId = dto.DisabilityType.Value
                     };
 
                     var updated = await _userdisability.UpdateAsync(userDisability.Id, updateDto);

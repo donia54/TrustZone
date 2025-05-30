@@ -61,7 +61,7 @@ namespace TrustZoneAPI.DTOs.Users
         [EmailAddress(ErrorMessage = "Invalid email format")]
         public string? Email { get; set; }
 
-        public int? DisabilityType { get; set; }
+     //   public int? DisabilityType { get; set; }
 
         [Required]
         [Range(1, 120, ErrorMessage = "Age must be between 1 and 120")]

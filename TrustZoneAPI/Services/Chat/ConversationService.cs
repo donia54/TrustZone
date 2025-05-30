@@ -73,7 +73,7 @@ public class ConversationService : IConversationService
         bool isUser1Exists = await _userService.IsUserExists(CurrentUserId);
         bool isUser2Exists = await _userService.IsUserExists(User2Id);
 
-        if (!(isUser1Exists && isUser1Exists))
+        if (!(isUser1Exists && isUser2Exists))
             return ResponseResult<int>.Error("User not found.", 404);
 
         var conversation = new Conversation
