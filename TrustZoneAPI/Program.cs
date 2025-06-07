@@ -112,6 +112,7 @@ builder.Services.AddScoped<IAccessibilityFeatureService, AccessibilityFeatureSer
 builder.Services.AddScoped<IBranchPhotoRepository, BranchPhotoRepository>();
 builder.Services.AddScoped<IBranchPhotoService, BranchPhotoService>();
 
+builder.Services.AddScoped<IEmailService, SendGridEmailService>();
 
 builder.Services.AddScoped<ISignalRMessageSender, SignalRMessageSender>();
 

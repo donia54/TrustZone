@@ -24,14 +24,16 @@ public class MessageService : IMessageService
     private readonly ITMessageRepository _repository;
     private readonly IConversationService _conversationService;
     private readonly IUserService _userService;
+    private readonly IUserProfileService _userProfileService;
     private readonly ISignalRMessageSender _signalRMessage;
     public MessageService(ITMessageRepository messageRepository,IConversationService conversationService
-        ,IUserService userService, ISignalRMessageSender signalRMessage)
+        ,IUserService userService, ISignalRMessageSender signalRMessage, IUserProfileService userProfileService)
     {
         _repository = messageRepository;
         _conversationService = conversationService;
         _userService = userService;
         _signalRMessage = signalRMessage;
+        _userProfileService = userProfileService;
     }
 
     public async Task<ResponseResult<MessageDTO>> GetByIdAsync(int id)
@@ -39,22 +41,24 @@ public class MessageService : IMessageService
         var message = await _repository.GetByIdAsync(id);
         return message == null
             ? ResponseResult<MessageDTO>.NotFound("Message not found.")
-            : ResponseResult<MessageDTO>.Success(_ConvertToDTO(message));
+            : ResponseResult<MessageDTO>.Success(await _ConvertToDTO(message));
     }
-
     public async Task<ResponseResult<IEnumerable<MessageDTO>>> GetMessagesByConversationAsync(int conversationId, int page = 1)
     {
-        var IsAuthorized = await _conversationService.IsCurrentUserInConversation(conversationId); // I think this is not organizer well.
-        if (!IsAuthorized)
-            return ResponseResult<IEnumerable<MessageDTO>>.Error("You are not authorized to view this conversation or it is not exists.", 403);
-        
+        var isAuthorized = await _conversationService.IsCurrentUserInConversation(conversationId);
+        if (!isAuthorized)
+            return ResponseResult<IEnumerable<MessageDTO>>.Error("You are not authorized to view this conversation or it does not exist.", 403);
+
         var messages = await _repository.GetMessagesByConversationAsync(conversationId, page);
         if (!messages.Any())
             return ResponseResult<IEnumerable<MessageDTO>>.NotFound("No messages found for this conversation yet.");
 
-        var messageDtos = messages.Select(_ConvertToDTO);
+        var messageDtoTasks = messages.Select(_ConvertToDTO); // returns IEnumerable<Task<MessageDTO>>
+        var messageDtos = await Task.WhenAll(messageDtoTasks); // waits for all to complete
+
         return ResponseResult<IEnumerable<MessageDTO>>.Success(messageDtos);
     }
+
 
     public async Task<ResponseResult> CreateAsync(CreateMessageDTO dto)
     {
@@ -142,7 +146,7 @@ public class MessageService : IMessageService
             ? ResponseResult.Success() 
             : ResponseResult.NotFound("Message not found.");
     }
-    private static MessageDTO _ConvertToDTO(TMessage message)
+    private async Task<MessageDTO> _ConvertToDTO(TMessage message)
     {
         return new MessageDTO
         {
@@ -157,7 +161,9 @@ public class MessageService : IMessageService
 
             {
                 Id = message.Sender.Id,
-                UserName = message.Sender.UserName
+                UserName = message.Sender.UserName,
+               // ProfilePicture = message.Sender.ProfilePicture
+               ProfilePicture = await _userProfileService.GetPictureUrlAsync(message.Sender.Id, "profile"),
             } : null
         };
     }

@@ -31,10 +31,11 @@ namespace TrustZoneAPI.Services.Users
         private readonly SignInManager<User> _SignInManager;
         private readonly IUserRepository _UserRepository;
         IHttpContextAccessor _HttpContextAccessor;
+        private readonly IEmailService _EmailService; 
 
         public UserService(UserManager<User> userManager,ITransactionService transactionService,
             IAuthService authService, SignInManager<User> signInManager,IUserRepository userRepository
-            , IHttpContextAccessor httpContextAccessor)
+            , IHttpContextAccessor httpContextAccessor, IEmailService emailService)
         {
             _UserManager = userManager;
             _TransactionService = transactionService;
@@ -42,6 +43,7 @@ namespace TrustZoneAPI.Services.Users
             _SignInManager = signInManager;
             _UserRepository = userRepository;
             _HttpContextAccessor = httpContextAccessor;
+            _EmailService = emailService;
 
             _userRepository = userRepository;
         }
@@ -85,6 +87,22 @@ namespace TrustZoneAPI.Services.Users
                 {
                     return ResponseResult<AuthDTO>.Error($"Failed to add role to user", 500);
                 }
+                #region Send email
+
+                try
+                {
+                    var subject = "Welcome to TrustZone!";
+                    var message = $"Hello {user.UserName},<br/>Your account has been successfully created.<br/>Thank you for joining us!";
+                    await _EmailService.SendEmailAsync(model.Email, subject, message);
+                    Console.WriteLine("Email sent successfully");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Email sending failed: " + ex.Message);
+                }
+                #endregion
+
+
                 var AuthTokenResult = await _AuthService.GetAuthResponseAsync(user, model.Password);
                 if (AuthTokenResult.IsSuccess && AuthTokenResult.Data != null)
                 {
